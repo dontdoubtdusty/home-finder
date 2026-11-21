@@ -89,6 +89,13 @@ Radford move-in, are worst), key local dates, moving tips, and a chart of how
 asking rents in your own saved listings change by month (it appears once a few
 months of data are collected).
 
+**🏡 Income-based** covers subsidized and income-restricted housing: how rent-based-on-income,
+tax-credit (LIHTC) and voucher programs differ; a "do we qualify?" check against the 2026
+income limits for Montgomery County and Radford (prefilled from Step 1, never saved); the local
+voucher office; and about 35 properties in Christiansburg, Blacksburg and Radford with phone
+numbers. **🏡 Income-based on map** shows them as purple pins. The list comes from
+affordable-housing directories, so call to confirm details.
+
 Other buttons: **Find new listings** (one RentCast request) and **Re-rank** (no API use).
 The **Search** screen covers bedrooms (pick any of Studio/1/2/3/4+), rent,
 bathrooms, pets, must-have and nice-to-have amenities, deal-tag strictness, and the

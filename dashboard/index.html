@@ -254,6 +254,33 @@
     .dates li { grid-template-columns: 1fr; gap: 0; }
   }
 
+  /* Income-based housing */
+  .elig-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 10px; }
+  .elig-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--muted); }
+  .elig-form select { font: inherit; padding: 8px 10px; border: 2px solid var(--line); border-radius: 12px;
+                      background: var(--panel); color: var(--text); }
+  .elig { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .elig li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; padding: 8px 10px; border-radius: 12px;
+             border: 2px solid var(--line); align-items: start; }
+  .elig li.yes { background: var(--soft); border-color: var(--pink); }
+  .elig li .mark { font-weight: 800; font-size: 16px; text-align: center; }
+  .elig li.yes .mark { color: var(--ok); } .elig li.no .mark { color: var(--muted); }
+  .elig li .lim { color: var(--muted); font-size: 12.5px; }
+  .aff-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .aff-list { display: grid; gap: 8px; }
+  .aff { border: 2px solid var(--line); border-radius: 16px; padding: 10px 12px; display: grid; gap: 3px; }
+  .aff h4 { margin: 0; font: 700 15px var(--font-display); display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .aff .kind { font: 600 11.5px var(--font); padding: 2px 8px; border-radius: 999px; background: var(--soft); color: var(--pink-strong); }
+  .aff .kind.k-income, .aff .kind.k-both { background: var(--pink-strong); color: var(--on-pink); }
+  .aff .kind.k-sub, .aff .kind.k-aff { background: transparent; border: 1.5px dashed var(--line); color: var(--muted); }
+  .row { font-size: 13px; color: var(--muted); }
+  .aff .acts { display: flex; gap: 12px; flex-wrap: wrap; font-size: 13px; margin-top: 2px; }
+  .aff .acts button { border: 0; background: none; color: var(--pink-strong); font: inherit; padding: 0; cursor: pointer; text-decoration: underline; }
+  .aff-pin { width: 26px; height: 26px; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); background: var(--berry);
+             border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.35); display: grid; place-items: center; }
+  .aff-pin span { transform: rotate(45deg); font-size: 13px; line-height: 1; }
+  .kinds { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+
   /* Settings screen */
   .summary-chip { background: var(--soft); border-color: var(--pink); color: var(--pink-strong); font-weight: 600; }
   .dialog.wide { width: min(780px, 100%); max-height: 90vh; display: flex; flex-direction: column; padding: 0; }
@@ -315,6 +342,7 @@
     <span class="pill" id="usage" hidden></span>
     <button class="iconbtn" id="muteBtn" data-quiet title="Sounds on/off" aria-label="Sounds on" aria-pressed="false">🔊</button>
     <button class="btn" id="whenBtn" title="Best and worst times to move in around here">📅 When to move</button>
+    <button class="btn" id="affBtn" title="Income-based and income-restricted apartments nearby">🏡 Income-based</button>
     <button class="btn step" id="budgetBtn" hidden><span class="num">1</span> Budget <b id="budgetAmt"></b></button>
     <button class="btn step" id="settingsBtn" hidden><span class="num">2</span>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
@@ -342,6 +370,7 @@
   </select></label>
   <span class="spacer"></span>
   <span id="flagBtns" style="display:flex;gap:8px;flex-wrap:wrap"></span>
+  <button class="chip" id="affChip" aria-pressed="false" title="Show income-based apartments on the map">🏡 Income-based on map</button>
 </div>
 
 <main>
@@ -423,6 +452,76 @@
         The seasonal price data is national; local prices may differ.</p>
     </div>
     <div class="actions"><button class="btn primary" id="whenClose">Close</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="afford" hidden>
+  <div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="affTitle">
+    <div class="dlg-head">
+      <span style="font-size:28px" aria-hidden="true">🏡</span>
+      <div><h2 id="affTitle" style="margin:0">Income-based apartments</h2>
+        <div class="sub">Christiansburg, Blacksburg &amp; Radford · 2026 income limits</div></div>
+    </div>
+    <div class="dlg-scroll">
+      <section class="set-section">
+        <h3>Three kinds of help</h3>
+        <ul class="kinds">
+          <li><b>🏡 Rent based on income</b> (HUD Section 8 buildings, senior and disability housing). You pay about <b>30% of your income</b>, whatever the apartment's normal rent is. These are usually the cheapest option, but waiting lists can be long.</li>
+          <li><b>🧾 Tax-credit apartments</b> (called LIHTC). Rent is capped and doesn't change with your income, but your household income must be <b>under a limit</b>, usually 60% of the area median.</li>
+          <li><b>🎫 Housing Choice Voucher</b> (Section 8 voucher). It pays part of the rent at a regular apartment whose landlord accepts vouchers. You pay about 30% of your income.</li>
+        </ul>
+      </section>
+
+      <section class="set-section">
+        <h3>Do we qualify?</h3>
+        <p class="hint">Uses total yearly income <b>before taxes</b> for everyone who'll live there. Step 1's income is filled in for you. Nothing here is saved or sent anywhere.</p>
+        <div class="elig-form">
+          <label>People in the household <select id="affSize"></select></label>
+          <label>Yearly income before taxes <span class="money"><span>$</span><input id="affIncome" type="number" min="0" step="1000" inputmode="numeric"></span></label>
+        </div>
+        <ul class="elig" id="affElig"></ul>
+        <p id="affRent" style="margin:10px 0 0"></p>
+        <details style="margin-top:8px"><summary class="hint" style="cursor:pointer">See all 2026 income limits</summary><div id="affTable"></div></details>
+      </section>
+
+      <section class="set-section">
+        <h3>🎫 Housing Choice Vouchers</h3>
+        <p style="margin:0 0 6px"><b>Housing Connections, Inc.</b> (formerly Pembroke Management) runs the voucher program's Christiansburg office for Montgomery and Floyd counties.</p>
+        <p class="row" style="margin:0">2955 Market St., Suite A, Christiansburg, VA 24073 · <a href="tel:+15403818101">(540) 381-8101</a> · weekdays 8:30–5 ·
+          <a href="https://www.housingconnectionsva.org" target="_blank" rel="noopener">housingconnectionsva.org</a></p>
+        <p class="hint" style="margin:6px 0 0">There are more applicants than vouchers, so you'll go on a waiting list. Call and ask whether the list is open. For Radford addresses, ask them who handles Radford; I couldn't confirm that office.</p>
+      </section>
+
+      <section class="set-section">
+        <h3>Places near you</h3>
+        <div class="aff-filters" id="affFilters"></div>
+        <div class="aff-list" id="affList"></div>
+        <p class="hint" style="margin-top:8px">Collected from affordable-housing directories, which are sometimes out of date. Call to confirm the program, rents and whether the waiting list is open.</p>
+      </section>
+
+      <section class="set-section">
+        <h3>Tips</h3>
+        <ul class="tips">
+          <li><b>Apply to several places at once.</b> Each property keeps its own waiting list, and being on one list doesn't stop you joining another.</li>
+          <li><b>When you call, ask:</b> "Is your waiting list open? About how long is the wait? Do you take vouchers? What's the rent for a ___-bedroom?"</li>
+          <li><b>Have these ready:</b> photo ID and Social Security cards for everyone, recent pay stubs or benefit letters, and bank statements.</li>
+          <li><b>Tax-credit rents aren't always low.</b> The 2026 caps here are high (up to $1,346 for a 1-bedroom at 60%), so ask for the actual rent.</li>
+          <li><b>Students:</b> a household where everyone is a full-time student usually can't rent a tax-credit apartment, though there are exceptions.</li>
+          <li><b>Keep your place on the list.</b> Waiting lists usually drop you if they can't reach you, so tell them when your phone or address changes.</li>
+        </ul>
+      </section>
+
+      <p class="sources" style="margin:12px 0 4px">Sources:
+        <a href="https://www.virginiahousing.com/partners/rental-housing/income-limits" target="_blank" rel="noopener">Virginia Housing 2026 income &amp; rent limits (HUD update 5/18/2026)</a> ·
+        <a href="https://affordablehousingonline.com/housing-search/Virginia/Christiansburg" target="_blank" rel="noopener">Affordable Housing Online: Christiansburg</a>,
+        <a href="https://affordablehousingonline.com/housing-search/Virginia/Blacksburg" target="_blank" rel="noopener">Blacksburg</a>,
+        <a href="https://affordablehousingonline.com/housing-search/Virginia/Radford" target="_blank" rel="noopener">Radford</a> ·
+        <a href="https://hudhousingnetwork.com/va/montgomery/christiansburg" target="_blank" rel="noopener">HUD Housing Network</a> ·
+        <a href="https://www.lowincomehousing.us/va/radford.html" target="_blank" rel="noopener">LowIncomeHousing.us: Radford</a> ·
+        <a href="https://disabilitynavigator.org/program/69719/housing-choice-voucher-program-christiansburg-office" target="_blank" rel="noopener">Voucher office listing</a> ·
+        Map locations: U.S. Census geocoder.</p>
+    </div>
+    <div class="actions"><button class="btn primary" id="affClose">Close</button></div>
   </div>
 </div>
 
@@ -1234,6 +1333,191 @@
     // Heartbeat: lets the app quit cleanly after the window is closed.
     setInterval(() => fetch("api/ping", { method: "POST", headers: { "X-Token": TOKEN } }).catch(() => {}), 10000);
   }
+  // --- Income-based apartments (see the sources listed on the page)
+  // 2026 limits for Montgomery County and Radford (Blacksburg-Christiansburg-Radford HUD Metro FMR Area),
+  // from Virginia Housing's "Program Income and Rent Limits" (reflects HUD update 5/18/2026). Index 0 = 1 person.
+  const AMI_2026 = 119600;
+  const LIMITS_2026 = {
+    30: [25140, 28710, 32310, 35880, 38760, 41640, 44520, 47370],
+    50: [41900, 47850, 53850, 59800, 64600, 69400, 74200, 78950],
+    60: [50280, 57420, 64620, 71760, 77520, 83280, 89040, 94740],
+    80: [67040, 76560, 86160, 95680, 103360, 111040, 118720, 126320],
+  };
+  // k: income = rent based on income · tax = tax credit · both · sub = listed as subsidized · aff = listed as affordable
+  const AFF_KINDS = {
+    income: "🏡 Rent based on income", both: "🏡 Rent help + tax credit", tax: "🧾 Tax credit",
+    sub: "Subsidized · call to confirm", aff: "Affordable · call for details",
+  };
+  const AFFORDABLE = [
+    { n: "Linden Green Apartments", a: "1600 Simpson Rd", c: "Christiansburg", z: "24073", k: "both", beds: "1–4", tel: "(540) 382-8578",
+      v: "Vouchers can't be used here (the building already has rent help)", note: "Applicants must earn 50% of area median or less. Another listing gives (540) 382-2002." },
+    { n: "Huckleberry Court Townhouses", a: "517 Virginian Dr", c: "Christiansburg", z: "24073", k: "tax", beds: "2–4", tel: "(540) 382-5058", v: "Accepts vouchers" },
+    { n: "Forest Hills at Belview", a: "3226 Peppers Ferry Rd NW", c: "Christiansburg", z: "24073", k: "tax", v: "Accepts vouchers", note: "Some units for households at 60% of area median." },
+    { n: "Christiansburg Bluff", a: "595 Republic Rd", c: "Christiansburg", z: "24073", k: "income", who: "Families", beds: "1–3", tel: "(540) 382-1977",
+      note: "Serves low-income families, seniors and people with disabilities. On a Blacksburg Transit route." },
+    { n: "Linden Grove", a: "240 Countrie Dr", c: "Christiansburg", z: "24073", k: "tax", beds: "2–3", v: "Accepts vouchers" },
+    { n: "Melinda's Melody", a: "100 Thaddeus Ln", c: "Christiansburg", z: "24073", k: "income", who: "Seniors" },
+    { n: "Crestview Apartments", a: "309 Pepper St SE", c: "Christiansburg", z: "24073", k: "sub", beds: "1–2", v: "Accepts vouchers" },
+    { n: "Nugget Ridge", a: "700 Nugget Ridge Rd", c: "Christiansburg", z: "24073", k: "sub", v: "Accepts vouchers" },
+    { n: "Sunvalley & Landings Apartments", a: "448 W Depot St", c: "Christiansburg", z: "24073", k: "sub", v: "Accepts vouchers",
+      note: "This address may be the management office, not the apartments." },
+    { n: "Henley Place", a: "1020 Beaver Dr", c: "Christiansburg", z: "24073", k: "aff", beds: "2–4" },
+    { n: "Colonial Manor Apartments", a: "2126 Dominion Dr", c: "Christiansburg", z: "24073", k: "aff" },
+    { n: "Hunting Hills Apartments", a: "3153 Hillman Ln", c: "Blacksburg", z: "24060", k: "sub", beds: "2" },
+    { n: "Fieldstone (family & senior)", a: "300 Fieldstone Ln", c: "Blacksburg", z: "24060", k: "aff", who: "Families and seniors", beds: "1–3",
+      v: "The family side accepts vouchers" },
+    { n: "Cedar Crest I", a: "322 Cedar Hill Dr", c: "Blacksburg", z: "24060", k: "aff", beds: "2–3", v: "Accepts vouchers" },
+    { n: "Cedar Crest II", a: "320 Essex Ct", c: "Blacksburg", z: "24060", k: "aff", beds: "2–3", v: "Accepts vouchers" },
+    { n: "Cedar Crest III", a: "1300 Brighton Ct", c: "Blacksburg", z: "24060", k: "aff", beds: "1–3" },
+    { n: "Grissom Lane Apartments", a: "1325 Brighton Ct", c: "Blacksburg", z: "24060", k: "aff", beds: "2" },
+    { n: "Lantern Ridge Apartments", a: "401 Fairfax Rd", c: "Blacksburg", z: "24060", k: "income", who: "Families", beds: "1–3", tel: "(540) 552-8172",
+      note: "One listing says 501 Fairfax Rd." },
+    { n: "Ellett Road Apartments", a: "201 Fairfax Rd", c: "Blacksburg", z: "24060", k: "income", who: "People with disabilities", beds: "1–2", tel: "(540) 951-0004" },
+    { n: "Trolinger House", a: "2603 Warm Hearth Dr", c: "Blacksburg", z: "24060", k: "income", who: "Seniors", beds: "1–2", tel: "(540) 443-3410" },
+    { n: "New River House", a: "2607 Warm Hearth Dr", c: "Blacksburg", z: "24060", k: "income", who: "Seniors", beds: "1–2", tel: "(540) 443-3410" },
+    { n: "Cambridge Square", a: "1805 Whipple Dr", c: "Blacksburg", z: "24060", k: "sub", who: "Families", beds: "2–4", tel: "(540) 953-1870" },
+    { n: "Willow Woods Apartments", a: "222 Allen Ave", c: "Radford", z: "24141", k: "income", who: "Families, seniors and people with disabilities", beds: "1–3",
+      note: "HUD-subsidized." },
+    { n: "Fairfax Village", a: "300 Fairfax St", c: "Radford", z: "24141", k: "sub", beds: "2–4" },
+    { n: "Riverbend Apartments", a: "108 Midkiff Ln", c: "Radford", z: "24141", k: "sub", beds: "1–4" },
+    { n: "Heather Glen Apartments", a: "1001 Heather Glen Dr", c: "Radford", z: "24141", k: "aff", beds: "1–3", note: "Listed as a short wait." },
+    { n: "Old Leggett Building", a: "1126 E Main St", c: "Radford", z: "24141", k: "aff", beds: "1" },
+    { n: "New River Overlook Apartments", a: "300 Jeffries Dr", c: "Radford", z: "24141", k: "aff", note: "Listed as a short wait." },
+    { n: "New River Gardens Apartments", a: "100 Jeffries Dr", c: "Radford", z: "24141", k: "aff", note: "Listed as a short wait." },
+    { n: "New River Gardens II Apartments", a: "200 Jeffries Dr", c: "Radford", z: "24141", k: "aff", note: "Listed as a short wait." },
+    { n: "Parkview of Radford", a: "101 Duncan Ln", c: "Radford", z: "24141", k: "aff", beds: "1" },
+    { n: "Forest Hills (Radford)", a: "180 Belview Dr", c: "Radford", z: "24141", k: "aff" },
+    { n: "Ridgewood Place", a: "100 Ridgewood Ln", c: "Radford", z: "24141", k: "aff", note: "Listed as a short wait." },
+    { n: "High Meadows", a: "140 E Main St", c: "Radford", z: "24141", k: "aff", note: "Listed as a short wait." },
+  ];
+  const AFF_GEO = {"517 Virginian Dr":[37.17639,-80.42825],"595 Republic Rd":[37.13728,-80.3963],"240 Countrie Dr":[37.13607,-80.3752],"100 Thaddeus Ln":[37.11871,-80.43297],"309 Pepper St SE":[37.12757,-80.40365],"700 Nugget Ridge Rd":[37.12739,-80.42247],"1020 Beaver Dr":[37.12921,-80.42898],"2126 Dominion Dr":[37.16444,-80.4562],"3153 Hillman Ln":[37.20628,-80.49343],"300 Fieldstone Ln":[37.25294,-80.41914],"322 Cedar Hill Dr":[37.20398,-80.39447],"1300 Brighton Ct":[37.20555,-80.3916],"1325 Brighton Ct":[37.20544,-80.39036],"401 Fairfax Rd":[37.20883,-80.39321],"201 Fairfax Rd":[37.20828,-80.39759],"2603 Warm Hearth Dr":[37.19991,-80.41913],"2607 Warm Hearth Dr":[37.19991,-80.41913],"1805 Whipple Dr":[37.25408,-80.41327],"1001 Heather Glen Dr":[37.11827,-80.56397],"1126 E Main St":[37.14103,-80.55722],"222 Allen Ave":[37.12054,-80.5627],"300 Jeffries Dr":[37.10692,-80.5803],"200 Jeffries Dr":[37.10752,-80.58132],"100 Jeffries Dr":[37.10691,-80.58413],"300 Fairfax St":[37.13242,-80.5422],"108 Midkiff Ln":[37.10829,-80.5853],"101 Duncan Ln":[37.12009,-80.561],"180 Belview Dr":[37.17207,-80.51287],"100 Ridgewood Ln":[37.12484,-80.54118],"140 E Main St":[37.13409,-80.53763]};  // address -> [lat, lon] from the U.S. Census geocoder
+  AFFORDABLE.forEach((p, i) => { p.id = "aff" + i; p.ll = AFF_GEO[p.a] || null; });
+
+  const milesBetween = (a, b) => {
+    const r = Math.PI / 180, dLat = (b[0] - a[0]) * r, dLon = (b[1] - a[1]) * r;
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dLon / 2) ** 2;
+    return 3958.8 * 2 * Math.asin(Math.sqrt(h));
+  };
+  const affDistance = (p) => (p.ll && state.D && state.D.center) ? milesBetween([state.D.center.lat, state.D.center.lon], p.ll) : null;
+  const mapsLink = (p) => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(`${p.n}, ${p.a}, ${p.c}, VA ${p.z}`);
+
+  const AFF_FILTERS = { all: "All", income: "🏡 Rent based on income", tax: "🧾 Tax credit", seniors: "Seniors", area: "In my search area" };
+  let affFilter = "all";
+  function affVisible() {
+    const radius = state.D && state.D.center ? state.D.center.radius_miles : null;
+    return AFFORDABLE.filter((p) => {
+      if (affFilter === "income") return p.k === "income" || p.k === "both";
+      if (affFilter === "tax") return p.k === "tax" || p.k === "both";
+      if (affFilter === "seniors") return /senior/i.test(p.who || "");
+      if (affFilter === "area") { const d = affDistance(p); return d != null && radius != null && d <= radius; }
+      return true;
+    }).sort((x, y) => (affDistance(x) ?? 999) - (affDistance(y) ?? 999));
+  }
+
+  function affHousehold() {
+    let n = 0;
+    try { n = +localStorage.getItem("hf-household") || 0; } catch { /* storage blocked */ }
+    if (!n) n = (BUD.budget && BUD.budget.earners && BUD.budget.earners.length) || 1;
+    return Math.min(8, Math.max(1, n));
+  }
+
+  function renderAffElig() {
+    const size = +$("affSize").value, i = size - 1;
+    const raw = $("affIncome").value, income = raw === "" ? null : +raw;
+    const rows = [
+      [30, "Extremely low income", "First in line for vouchers and rent-based-on-income housing."],
+      [50, "Very low income", "Qualifies for Housing Choice Vouchers and most rent-based-on-income buildings."],
+      [60, "Tax-credit limit", "Qualifies for most tax-credit (LIHTC) apartments."],
+      [80, "Low income", "Qualifies for some HUD buildings; wait times are usually longest at this level."],
+    ];
+    $("affElig").innerHTML = rows.map(([pct, name, what]) => {
+      const lim = LIMITS_2026[pct][i];
+      const ok = income != null && income <= lim;
+      const cls = income == null ? "" : ok ? "yes" : "no";
+      return `<li class="${cls}"><span class="mark" aria-hidden="true">${income == null ? "·" : ok ? "✓" : "✕"}</span>
+        <div><b>${pct}% of area median · ${name}</b> <span class="lim">up to ${money(lim)}/yr for ${size} ${size === 1 ? "person" : "people"}</span>
+        <div class="row">${income == null ? what : ok ? `${esc(what)} <b>You're under this limit.</b>` : `Over this limit by ${money(income - lim)}.`}</div></div></li>`;
+    }).join("");
+    $("affRent").innerHTML = income
+      ? `In a <b>rent-based-on-income</b> apartment, or with a voucher, you'd pay roughly <b>${money(income * 0.3 / 12)}/mo</b> including utilities (30% of income, before allowed deductions).`
+      : "Enter your income to check.";
+    $("affTable").innerHTML = `<table style="font-size:13px;border-collapse:collapse;margin-top:6px;font-variant-numeric:tabular-nums">
+      <tr><th style="text-align:left;padding:2px 12px 2px 0">People</th>${[30, 50, 60, 80].map((p) => `<th style="text-align:right;padding:2px 0 2px 14px">${p}%</th>`).join("")}</tr>
+      ${LIMITS_2026[30].map((_, k) => `<tr${k === i ? ' style="font-weight:700;color:var(--pink-strong)"' : ""}><td style="padding:2px 12px 2px 0">${k + 1}</td>${[30, 50, 60, 80].map((p) =>
+        `<td style="text-align:right;padding:2px 0 2px 14px">${money(LIMITS_2026[p][k])}</td>`).join("")}</tr>`).join("")}</table>
+      <p class="hint" style="margin:6px 0 0">Area median income: ${money(AMI_2026)}. Some older tax-credit buildings use slightly higher limits.</p>`;
+  }
+
+  function renderAffList() {
+    $("affFilters").innerHTML = Object.entries(AFF_FILTERS).map(([k, v]) =>
+      `<button class="chip" data-f="${k}" aria-pressed="${k === affFilter}">${esc(v)}</button>`).join("");
+    const rows = affVisible();
+    $("affList").innerHTML = rows.length ? rows.map((p) => {
+      const d = affDistance(p);
+      const bits = [p.who, p.beds ? `${p.beds} bd` : "", d != null ? `${d.toFixed(1)} mi away` : ""].filter(Boolean).join(" · ");
+      return `<div class="aff" data-id="${p.id}">
+        <h4>${esc(p.n)} <span class="kind k-${p.k}">${esc(AFF_KINDS[p.k])}</span></h4>
+        <div class="row">${esc(p.a)}, ${esc(p.c)} ${esc(p.z)}${bits ? " · " + esc(bits) : ""}</div>
+        ${p.v ? `<div class="row">🎫 ${esc(p.v)}</div>` : ""}
+        ${p.note ? `<div class="row">${esc(p.note)}</div>` : ""}
+        <div class="acts">${p.tel ? `<a href="tel:${p.tel.replace(/\D/g, "")}">📞 ${esc(p.tel)}</a>` : ""}
+          ${p.ll ? `<button type="button" data-show="${p.id}">Show on map</button>` : ""}
+          <a href="${mapsLink(p)}" target="_blank" rel="noopener">Open in Maps ↗</a></div></div>`;
+    }).join("") : `<p class="hint">None in this group${affFilter === "area" ? " inside your search circle. Try a bigger radius in Search." : "."}</p>`;
+  }
+
+  // Map pins (a separate layer, so re-ranking doesn't clear them)
+  let affLayer = null;
+  const affMarkers = {};
+  function setAffLayer(on) {
+    $("affChip").setAttribute("aria-pressed", String(on));
+    if (!window.L || !state.map) return;
+    if (!affLayer) {
+      affLayer = L.layerGroup();
+      AFFORDABLE.forEach((p) => {
+        if (!p.ll) return;
+        const m = L.marker(p.ll, { icon: L.divIcon({ className: "", html: '<div class="aff-pin"><span>🏡</span></div>', iconSize: [26, 26], iconAnchor: [13, 26], popupAnchor: [0, -24] }),
+                                   title: p.n, keyboard: true })
+          .bindPopup(`<b>${esc(p.n)}</b><br>${esc(AFF_KINDS[p.k])}<br>${esc(p.a)}, ${esc(p.c)}${p.who ? "<br>" + esc(p.who) : ""}${p.tel ? `<br><a href="tel:${p.tel.replace(/\D/g, "")}">${esc(p.tel)}</a>` : ""}`);
+        m.addTo(affLayer); affMarkers[p.id] = m;
+      });
+    }
+    on ? affLayer.addTo(state.map) : affLayer.remove();
+  }
+  $("affChip").addEventListener("click", () => {
+    const on = $("affChip").getAttribute("aria-pressed") !== "true";
+    setAffLayer(on); on ? Sound.pop() : Sound.unpop(); bounce($("affChip"));
+  });
+
+  function openAfford() {
+    $("affSize").innerHTML = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => `<option value="${n}">${n}</option>`).join("");
+    $("affSize").value = String(affHousehold());
+    const gm = BUD.result && BUD.result.gross_monthly;
+    $("affIncome").value = gm ? String(Math.round(gm * 12)) : "";
+    renderAffElig(); renderAffList();
+    $("afford").hidden = false; Sound.whoosh();
+  }
+  const closeAfford = () => ($("afford").hidden = true);
+  $("affBtn").addEventListener("click", openAfford);
+  $("affClose").addEventListener("click", closeAfford);
+  $("afford").addEventListener("click", (e) => { if (e.target === $("afford")) closeAfford(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("afford").hidden) closeAfford(); });
+  $("affSize").addEventListener("change", () => {
+    try { localStorage.setItem("hf-household", $("affSize").value); } catch { /* storage blocked */ }
+    Sound.select(); renderAffElig();
+  });
+  $("affIncome").addEventListener("input", renderAffElig);
+  $("affFilters").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    affFilter = b.dataset.f; Sound.pop(); renderAffList(); bounce($("affFilters").querySelector(`[data-f="${affFilter}"]`));
+  });
+  $("affList").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-show]"); if (!b) return;
+    closeAfford(); setAffLayer(true);
+    const m = affMarkers[b.dataset.show];
+    if (m) { state.map.setView(m.getLatLng(), 15); m.openPopup(); Sound.select(); }
+  });
+
   // --- When to move (researched for the New River Valley; see the sources on the page)
   const RATINGS = {
     best: { label: "Best", icon: "💖" }, good: { label: "Good", icon: "👍" },

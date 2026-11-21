@@ -68,9 +68,19 @@ The dashboard is `dashboard/index.html`. Open it directly from disk; no server n
 
 ### Desktop app: Bebe's Home Search
 
-`Bebe's Home Search.exe` opens the dashboard in its own window, with a
-**Find new listings** button (one RentCast request), **Re-rank** (no API use), and
-**Search settings**: a screen for bedrooms (pick any of Studio/1/2/3/4+), rent,
+`Bebe's Home Search.exe` opens the dashboard in its own window. Searching is two steps:
+
+1. **Budget**: enter each person's income (gross and take-home), monthly bills,
+   a utilities estimate and move-in savings. It works out rent three ways (30% of
+   gross income minus utilities; the landlord 40x rule; take-home minus bills and
+   utilities) and uses the **lowest** as the budget. It also checks move-in money
+   (first month + deposit + pet deposit + fees). Saved privately to
+   `data/budget.json`; never committed or synced. Opens automatically the first time.
+2. **Search**: starts with the budget as the max rent. Listing cards show
+   "Over budget" and the estimated move-in cost vs. your savings.
+
+Other buttons: **Find new listings** (one RentCast request) and **Re-rank** (no API use).
+The **Search** screen covers bedrooms (pick any of Studio/1/2/3/4+), rent,
 bathrooms, pets, must-have and nice-to-have amenities, deal-tag strictness, and the
 search area (click the map, drag the radius). Those choices are saved to
 `data/settings.json` and override `config.yaml`, which is never rewritten.

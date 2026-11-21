@@ -130,6 +130,46 @@
   @keyframes hop { 0%, 100% { transform: rotate(45deg) translate(0, 0); } 50% { transform: rotate(45deg) translate(-5px, -5px); } }
   @media (prefers-reduced-motion: reduce) { .hearts span { animation: none; } .card { transition: none; } }
 
+  /* Step buttons */
+  .btn.step .num { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+                   background: var(--pink-strong); color: var(--on-pink); font-size: 12.5px; font-weight: 700; }
+  .btn.step b { color: var(--pink-strong); }
+  .tag.movein { color: var(--muted); font-weight: 500; }
+  .tag.movein.over { color: var(--bow-dark); font-weight: 700; }
+  .tag.over-budget { color: var(--bow-dark); }
+
+  /* Budget screen */
+  .rows { display: grid; gap: 8px; }
+  .brow { display: grid; gap: 8px; align-items: end; }
+  .brow.earner { grid-template-columns: minmax(90px, 1.1fr) minmax(120px, 1.3fr) 92px minmax(120px, 1.3fr) 36px; }
+  .brow.bill { grid-template-columns: minmax(120px, 2fr) minmax(110px, 1fr) 36px; }
+  .brow label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); min-width: 0; }
+  .brow input[type=text], .brow select, .field select {
+    border: 2px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--text);
+    font: inherit; padding: 8px 10px; min-width: 0; width: 100%; }
+  .brow .money input { width: 100%; }
+  .brow .money { min-width: 0; }
+  .xbtn { border: 0; background: var(--soft); color: var(--pink-strong); width: 36px; height: 38px; border-radius: 12px; cursor: pointer; font-size: 16px; }
+  .addbtn { justify-self: start; border: 2px dashed var(--pink); background: transparent; color: var(--pink-strong);
+            border-radius: 999px; padding: 6px 14px; cursor: pointer; font-weight: 600; }
+  .fields { display: flex; flex-wrap: wrap; gap: 12px; }
+  .field { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
+  .results { padding: 12px 24px; background: var(--soft); border-top: 2px solid var(--line); display: grid; gap: 8px; }
+  .methods { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+  .method { background: var(--panel); border: 2px solid var(--line); border-radius: 14px; padding: 8px 12px; }
+  .method.low { border-color: var(--pink-strong); }
+  .method .m-label { font-size: 12px; color: var(--muted); }
+  .method .m-amt { font: 700 18px var(--font-display); font-variant-numeric: tabular-nums; }
+  .method .m-how { font-size: 11.5px; color: var(--muted); }
+  .bigbudget { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .bigbudget .amt { font: 800 28px var(--font-display); color: var(--pink-strong); font-variant-numeric: tabular-nums; }
+  .movein-line { font-size: 13px; }
+  .movein-line.warn { color: var(--bow-dark); font-weight: 600; }
+  @media (max-width: 640px) {
+    .brow.earner { grid-template-columns: 1fr 1fr; }
+    .brow.earner .xbtn { grid-column: 2; justify-self: end; }
+  }
+
   /* Settings screen */
   .summary-chip { background: var(--soft); border-color: var(--pink); color: var(--pink-strong); font-weight: 600; }
   .dialog.wide { width: min(780px, 100%); max-height: 90vh; display: flex; flex-direction: column; padding: 0; }
@@ -179,9 +219,10 @@
   </div>
   <div class="head-right">
     <span class="pill" id="usage" hidden></span>
-    <button class="btn" id="settingsBtn" hidden>
+    <button class="btn step" id="budgetBtn" hidden><span class="num">1</span> Budget <b id="budgetAmt"></b></button>
+    <button class="btn step" id="settingsBtn" hidden><span class="num">2</span>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-      Search settings</button>
+      Search</button>
     <button class="btn" id="rescoreBtn" hidden title="Recalculate deals from saved listings (no API use)">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Re-rank</button>
@@ -220,6 +261,53 @@
   </div>
 </div>
 
+<div class="overlay" id="budget" hidden>
+  <div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="budTitle">
+    <div class="dlg-head">
+      <span class="btn step" style="padding:0;border:0;background:none"><span class="num">1</span></span>
+      <div><h2 id="budTitle" style="margin:0">Let's figure out the budget</h2>
+        <div class="sub">This stays private on this PC. It's never uploaded or shared.</div></div>
+    </div>
+    <div class="dlg-scroll">
+      <section class="set-section">
+        <h3>💰 Income</h3>
+        <p class="hint"><b>Gross</b> = before taxes (on an offer letter or pay stub). <b>Take-home</b> = what actually lands in the bank each month.</p>
+        <div class="rows" id="earners"></div>
+        <button class="addbtn" id="addEarner" type="button">+ Add a person</button>
+      </section>
+      <section class="set-section">
+        <h3>🧾 Monthly bills</h3>
+        <p class="hint">Everything you pay each month besides rent and utilities, including a savings goal if you have one.</p>
+        <div class="rows" id="bills"></div>
+        <button class="addbtn" id="addBill" type="button">+ Add a bill</button>
+      </section>
+      <section class="set-section">
+        <h3>💡 Utilities</h3>
+        <p class="hint">Electric, gas, water, internet. Comes out of the rent budget. Apartments often run $100–250/month.</p>
+        <div class="fields"><label class="field">Per month <span class="money"><span>$</span><input id="budUtil" type="number" min="0" step="10" inputmode="numeric"></span></label></div>
+      </section>
+      <section class="set-section">
+        <h3>🔑 Move-in money</h3>
+        <p class="hint">Moving in usually costs the first month + a security deposit, plus any pet deposit and fees.</p>
+        <div class="fields">
+          <label class="field">Savings for moving <span class="money"><span>$</span><input id="budSavings" type="number" min="0" step="50" inputmode="numeric"></span></label>
+          <label class="field">Security deposit
+            <select id="budDeposit"><option value="0">None</option><option value="0.5">½ month's rent</option><option value="1" selected>1 month's rent</option><option value="1.5">1½ months' rent</option><option value="2">2 months' rent</option></select></label>
+          <label class="field">Pet deposit/fees <span class="money"><span>$</span><input id="budPet" type="number" min="0" step="25" inputmode="numeric"></span></label>
+          <label class="field">Other (app fees, movers) <span class="money"><span>$</span><input id="budOther" type="number" min="0" step="25" inputmode="numeric"></span></label>
+        </div>
+      </section>
+    </div>
+    <div class="results" id="budResults" aria-live="polite"></div>
+    <div class="actions">
+      <span class="set-error" id="budError" role="alert"></span>
+      <button class="btn" id="budCancel">Close</button>
+      <button class="btn" id="budSave">Save</button>
+      <button class="btn primary" id="budApply">Use as budget → Step 2</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="settings" hidden>
   <div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="setTitle">
     <div class="dlg-head">
@@ -235,6 +323,7 @@
       </section>
       <section class="set-section">
         <h3>💸 Monthly rent</h3>
+        <p class="hint" id="rentHint"></p>
         <div class="row-inputs">
           <label>From <span class="money"><span>$</span><input id="setRentMin" type="number" min="0" step="25" inputmode="numeric"></span></label>
           <label>Up to <span class="money"><span>$</span><input id="setRentMax" type="number" min="0" step="25" inputmode="numeric" placeholder="No limit"></span></label>
@@ -312,6 +401,7 @@
   }
 
   const state = { flags: new Set(), selected: null, D: null, map: null, layer: null, ring: null, markers: {} };
+  const BUD = { budget: null, result: null, has_pets: false };  // Step 1 data (desktop only)
 
   function bedsLabel(b) { return b == null ? "? bd" : b === 0 ? "Studio" : `${b} bd`; }
 
@@ -362,6 +452,13 @@
       return `<span class="tag ${esc(f)}">${esc(t)}</span>`;
     });
     l.unknown.forEach((u) => tags.push(`<span class="tag unknown">${esc(u)}?</span>`));
+    const bud = BUD.budget, res = BUD.result;
+    if (bud && res) {
+      if (res.budget != null && l.price > res.budget) tags.push(`<span class="tag over-budget">Over budget by ${money(l.price - res.budget)}</span>`);
+      const moveIn = l.price * (1 + bud.deposit_months) + bud.pet_deposit + bud.other_move_in;
+      const over = bud.savings > 0 && moveIn > bud.savings;
+      tags.push(`<span class="tag movein ${over ? "over" : ""}">Move-in ~${money(moveIn)}${over ? ` · ${money(moveIn - bud.savings)} more than saved` : ""}</span>`);
+    }
     const market = l.market_median != null
       ? `Similar homes nearby: ~${money(l.market_median)} (${l.comp_count} compared)`
       : `Not enough similar homes nearby to compare yet`;
@@ -592,6 +689,10 @@
     }
     $("setError").textContent = "";
     pickGroup($("setBeds"), c.options.beds.map((b) => [b, BED_LABELS[b]]), c.beds, true);
+    const b = BUD.result && BUD.result.budget;
+    $("rentHint").innerHTML = b != null
+      ? `From step 1, your budget is <b>${money(b)}/mo</b>.${c.rent_max != null && c.rent_max > b ? " Your max below is higher than that." : ""}`
+      : 'Tip: do <b>Step 1: Budget</b> first and it fills this in for you.';
     $("setRentMin").value = c.rent_min || "";
     $("setRentMax").value = c.rent_max ?? "";
     const bathSel = BATHS.some(([v]) => v === c.baths_min) ? c.baths_min : 0;
@@ -662,8 +763,165 @@
     }
   });
 
+  // --- Step 1: Budget screen
+  const DEFAULT_BILLS = ["Car payment", "Phone", "Credit cards / loans", "Insurance", "Groceries", "Savings goal"];
+
+  function moneyInput(cls, value, label) {
+    return `<span class="money"><span>$</span><input class="${cls}" type="number" min="0" step="any" inputmode="decimal" value="${value === 0 || value ? esc(value) : ""}" aria-label="${esc(label)}"></span>`;
+  }
+  function earnerRow(e = {}) {
+    const d = document.createElement("div");
+    d.className = "brow earner";
+    d.innerHTML = `
+      <label>Who <input type="text" class="e-name" maxlength="40" placeholder="Name" value="${esc(e.name || "")}"></label>
+      <label>Gross pay ${moneyInput("e-gross", e.gross, "Gross pay")}</label>
+      <label>per <select class="e-period"><option value="year">year</option><option value="month">month</option></select></label>
+      <label>Take-home / month ${moneyInput("e-take", e.take_home, "Take-home pay per month")}</label>
+      <button type="button" class="xbtn" title="Remove" aria-label="Remove person">✕</button>`;
+    d.querySelector(".e-period").value = e.gross_period || "year";
+    return d;
+  }
+  function billRow(b = {}) {
+    const d = document.createElement("div");
+    d.className = "brow bill";
+    d.innerHTML = `
+      <label>Bill <input type="text" class="b-name" maxlength="40" value="${esc(b.name || "")}" placeholder="e.g. Gym"></label>
+      <label>Per month ${moneyInput("b-amt", b.amount, "Amount per month")}</label>
+      <button type="button" class="xbtn" title="Remove" aria-label="Remove bill">✕</button>`;
+    return d;
+  }
+
+  function collectBudget() {
+    const num = (el) => el.value === "" ? 0 : +el.value;
+    return {
+      earners: [...document.querySelectorAll("#earners .earner")].map((r) => ({
+        name: r.querySelector(".e-name").value, gross: num(r.querySelector(".e-gross")),
+        gross_period: r.querySelector(".e-period").value, take_home: num(r.querySelector(".e-take")),
+      })),
+      bills: [...document.querySelectorAll("#bills .bill")].map((r) => ({
+        name: r.querySelector(".b-name").value, amount: num(r.querySelector(".b-amt")),
+      })),
+      utilities: num($("budUtil")), savings: num($("budSavings")),
+      deposit_months: +$("budDeposit").value, pet_deposit: num($("budPet")), other_move_in: num($("budOther")),
+    };
+  }
+
+  function renderResults(r) {
+    const el = $("budResults");
+    if (!r || !r.methods.length) {
+      el.innerHTML = '<div class="sub">Enter at least one income above to see your budget.</div>';
+      $("budApply").disabled = true; return;
+    }
+    $("budApply").disabled = false;
+    $("budApply").textContent = `Use ${money(r.budget)}/mo → Step 2`;
+    const lowLabel = r.methods.find((m) => m.key === r.limited_by).label;
+    const mi = r.move_in;
+    let moveLine = "";
+    if (mi.max_rent_by_savings != null) {
+      const ok = mi.max_rent_by_savings >= r.budget;
+      moveLine = `<div class="movein-line ${ok ? "" : "warn"}">🔑 Move-in at ${money(r.budget)} rent ≈ ${money(mi.at_budget)}. `
+        + (ok ? `Your ${money(mi.savings)} saved covers it ♥` : `Your ${money(mi.savings)} saved covers move-in up to about ${money(mi.max_rent_by_savings)} rent.`) + "</div>";
+    } else if (mi.at_budget != null) {
+      moveLine = `<div class="movein-line">🔑 Move-in at ${money(r.budget)} rent ≈ ${money(mi.at_budget)}. Add your savings above to check it.</div>`;
+    }
+    el.innerHTML = `
+      <div class="bigbudget"><span>Your rent budget:</span><span class="amt">${money(r.budget)}/mo</span>
+        <span class="sub">the lowest of the three (${esc(lowLabel)})</span></div>
+      <div class="methods">${r.methods.map((m) => `<div class="method ${m.key === r.limited_by ? "low" : ""}">
+        <div class="m-label">${esc(m.label)}</div><div class="m-amt">${money(m.amount)}</div><div class="m-how">${esc(m.how)}</div></div>`).join("")}</div>
+      ${moveLine}`;
+  }
+
+  let calcTimer = null;
+  function recalc() {
+    clearTimeout(calcTimer);
+    calcTimer = setTimeout(async () => {
+      try {
+        const r = await api("api/budget", "POST", { action: "calc", budget: collectBudget() });
+        if (r.status === 200) { $("budError").textContent = ""; renderResults(r.body.result); }
+        else $("budError").textContent = r.body.error || "Check the numbers";
+      } catch { /* server gone */ }
+    }, 250);
+  }
+
+  async function loadBudget() {
+    const r = await api("api/budget");
+    if (r.status !== 200) throw new Error(r.body.error || "Couldn't load budget");
+    Object.assign(BUD, r.body);
+    $("budgetAmt").textContent = BUD.result && BUD.result.budget != null ? money(BUD.result.budget) : "";
+    return BUD;
+  }
+
+  async function openBudget() {
+    try { await loadBudget(); } catch (e) {
+      dialog("Setup needed", `<p>${esc(e.message)}</p>`, [["OK", "primary", closeDialog]]); return;
+    }
+    const b = BUD.budget || {
+      earners: [{}], bills: DEFAULT_BILLS.map((name) => ({ name })),
+      utilities: 150, savings: "", deposit_months: 1, pet_deposit: BUD.has_pets ? 300 : 0, other_move_in: 100,
+    };
+    $("earners").replaceChildren(...(b.earners.length ? b.earners : [{}]).map(earnerRow));
+    $("bills").replaceChildren(...b.bills.map(billRow));
+    $("budUtil").value = b.utilities ?? "";
+    $("budSavings").value = b.savings || "";
+    $("budDeposit").value = String(b.deposit_months ?? 1);
+    if (!$("budDeposit").value) $("budDeposit").value = "1";
+    $("budPet").value = b.pet_deposit || "";
+    $("budOther").value = b.other_move_in || "";
+    $("budError").textContent = "";
+    renderResults(BUD.result);
+    $("budget").hidden = false;
+    recalc();
+    const first = $("earners").querySelector(".e-name");
+    if (first) first.focus();
+  }
+
+  $("budget").addEventListener("input", recalc);
+  $("budget").addEventListener("change", recalc);
+  $("budget").addEventListener("click", (e) => {
+    const x = e.target.closest(".xbtn");
+    if (x) {
+      const row = x.closest(".brow");
+      if (row.classList.contains("earner") && $("earners").children.length === 1) return; // keep one
+      row.remove(); recalc();
+    }
+  });
+  $("addEarner").addEventListener("click", () => { $("earners").appendChild(earnerRow()); $("earners").lastElementChild.querySelector(".e-name").focus(); });
+  $("addBill").addEventListener("click", () => { $("bills").appendChild(billRow()); $("bills").lastElementChild.querySelector(".b-name").focus(); });
+  const closeBudget = () => ($("budget").hidden = true);
+  $("budCancel").addEventListener("click", closeBudget);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("budget").hidden) closeBudget(); });
+  $("budgetBtn").addEventListener("click", openBudget);
+
+  async function sendBudget(action) {
+    $("budError").textContent = "";
+    $("budSave").disabled = $("budApply").disabled = true;
+    try {
+      const r = await api("api/budget", "POST", { action, budget: collectBudget() });
+      if (r.status === 409) { $("budError").textContent = "Busy with a search. Try again in a moment."; return null; }
+      if (r.status !== 200) { $("budError").textContent = r.body.error || "Couldn't save"; return null; }
+      await loadBudget();
+      return r.body;
+    } finally {
+      $("budSave").disabled = false; $("budApply").disabled = false;
+    }
+  }
+  $("budSave").addEventListener("click", async () => {
+    if (await sendBudget("save")) { closeBudget(); render(); }
+  });
+  $("budApply").addEventListener("click", async () => {
+    const res = await sendBudget("apply");
+    if (!res) return;
+    closeBudget();
+    await loadSettings();
+    await runJob("rescore", true);
+    openSettings();  // Step 2, with the budget filled in as the max rent
+  });
+
   // --- start
   if (DESKTOP) {
+    $("budgetBtn").hidden = false;
+    loadBudget().then((b) => { if (!b.budget) openBudget(); render(); }).catch(() => {});
     $("refreshBtn").hidden = false; $("rescoreBtn").hidden = false; $("settingsBtn").hidden = false;
     loadSettings().catch(() => {});
     refreshStatus().then((s) => { if (s && s.job.running) runJob(s.job.kind); });

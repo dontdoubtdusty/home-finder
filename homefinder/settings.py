@@ -44,12 +44,16 @@ def save_overrides(path: Path, overrides: Dict[str, Any]) -> None:
 def current(cfg: Dict[str, Any]) -> Dict[str, Any]:
     """The settings the screen shows (never includes API keys)."""
     f, s, sc = cfg["filters"], cfg["search"], cfg["scoring"]
+    beds = list(f.get("beds") or [])
+    if not beds and (f.get("beds_min") or 0) > 0:
+        # Show config.yaml's "beds_min" as the equivalent bedroom buttons so saving keeps it.
+        beds = [b for b in BEDS if b >= min(int(f["beds_min"]), 4)]
     preset = next((name for name, vals in PRESETS.items()
                    if all(sc.get(k) == v for k, v in vals.items())), "custom")
     return {
         "latitude": s["latitude"], "longitude": s["longitude"], "radius_miles": s["radius_miles"],
         "rent_min": f.get("rent_min") or 0, "rent_max": f.get("rent_max"),
-        "beds": list(f.get("beds") or []), "beds_min": f.get("beds_min") or 0,
+        "beds": beds, "beds_min": f.get("beds_min") or 0,
         "baths_min": f.get("baths_min") or 0,
         "pets": list(f.get("pets") or []),
         "amenities_required": list(f.get("amenities_required") or []),

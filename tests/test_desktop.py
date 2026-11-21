@@ -103,6 +103,30 @@ class DesktopSettingsTest(DesktopServerTest):
         again = json.loads(self.req("/api/settings", token=t)[1])
         self.assertEqual((again["beds"], again["rent_max"], again["radius_miles"]), ([0, 1], 650, 12))
 
+    def test_budget_calc_save_apply(self):
+        t = self.app.token
+        b = {"earners": [{"gross": 2400, "gross_period": "month", "take_home": 2000}],
+             "bills": [{"name": "Car", "amount": 200}], "utilities": 100, "savings": 2000}
+        code, res = self.post_json("/api/budget", {"action": "calc", "budget": b}, t)
+        self.assertEqual(code, 200)
+        self.assertEqual(res["result"]["budget"], 600)  # 720 - 100 = 620 -> 600
+        self.assertFalse(self.app.budget_path().exists())  # calc doesn't save
+
+        code, res = self.post_json("/api/budget", {"action": "apply", "budget": b}, t)
+        self.assertEqual((code, res["applied"]), (200, 600))
+        for _ in range(50):
+            if not self.app.job["running"]:
+                break
+            time.sleep(0.1)
+        self.assertEqual(json.loads(self.req("/api/settings", token=t)[1])["rent_max"], 600)
+        stored = json.loads(self.req("/api/budget", token=t)[1])
+        self.assertEqual(stored["result"]["budget"], 600)
+        self.assertEqual(stored["budget"]["earners"][0]["name"], "Person 1")
+
+        code, res = self.post_json("/api/budget", {"action": "apply", "budget": {"earners": [{}]}}, t)
+        self.assertEqual(code, 400)  # no income -> can't apply
+        self.assertEqual(self.req("/api/budget", token="nope")[0], 403)
+
     def test_settings_rejects_bad_input_and_no_token(self):
         self.assertEqual(self.post_json("/api/settings", {"beds": [9]}, self.app.token)[0], 400)
         self.assertEqual(self.req("/api/settings", "POST")[0], 403)

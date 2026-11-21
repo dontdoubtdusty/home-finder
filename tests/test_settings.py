@@ -38,6 +38,17 @@ class ValidateTest(unittest.TestCase):
         self.assertIsNone(validate(dict(GOOD, rent_max=None))["filters"]["rent_max"])
 
 
+class BedsMinCarryOverTest(unittest.TestCase):
+    def test_config_minimum_survives_a_save(self):
+        cfg = copy.deepcopy(DEFAULTS)
+        cfg["search"].update(latitude=1.0, longitude=2.0)
+        cfg["filters"]["beds_min"] = 2
+        shown = current(cfg)
+        self.assertEqual(shown["beds"], [2, 3, 4])
+        shown.pop("options")
+        self.assertEqual(validate(shown)["filters"]["beds"], [2, 3, 4])
+
+
 class BedFilterTest(unittest.TestCase):
     def f(self, beds):
         f = copy.deepcopy(DEFAULTS["filters"])

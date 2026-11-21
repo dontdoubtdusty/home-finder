@@ -198,6 +198,61 @@ class DesktopApp:
         started = self.start_job("rescore")
         return {"saved": True, "area_changed": area_changed, "rescore_started": started}
 
+    # ---- Step 1: budget
+    def budget_path(self) -> Path:
+        from .config import load_config
+        return Path(load_config(self.config_path)["settings_file"]).parent / "budget.json"
+
+    def get_budget(self) -> Dict[str, Any]:
+        from . import budget as B
+        from .config import load_config
+        cfg = load_config(self.config_path)
+        stored = B.load(self.budget_path())
+        return {"budget": stored, "result": B.compute(stored) if stored else None,
+                "has_pets": bool(cfg["filters"].get("pets")),
+                "rent_max": cfg["filters"].get("rent_max")}
+
+    def post_budget(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """action: calc (preview only) | save | apply (save + use as max rent)."""
+        from . import budget as B
+        action = payload.get("action", "calc")
+        if action not in ("calc", "save", "apply"):
+            raise B.BudgetError("Unknown action")
+        b = B.clean(payload.get("budget"))
+        result = B.compute(b)
+        out: Dict[str, Any] = {"result": result}
+        if action == "calc":
+            return out
+        if self.job["running"]:
+            return dict(out, saved=False, busy=True)
+        B.save(self.budget_path(), b)
+        out["saved"] = True
+        if action == "apply":
+            if result["budget"] is None:
+                raise B.BudgetError("Enter some income first")
+            self._set_rent_max(result["budget"])
+            out["applied"] = result["budget"]
+            out["rescore_started"] = self.start_job("rescore")
+        return out
+
+    def _set_rent_max(self, amount: int) -> None:
+        from .config import load_config
+        from .settings import current, save_overrides, validate
+        cfg = load_config(self.config_path)
+        cur = current(cfg)
+        cur.pop("options", None)
+        cur["rent_max"] = amount
+        if (cur.get("rent_min") or 0) > amount:
+            cur["rent_min"] = 0
+        custom = cur["deal_preset"] == "custom"
+        if custom:
+            cur["deal_preset"] = "balanced"
+        overrides = validate(cur)
+        if custom:  # keep hand-tuned deal settings from config.yaml
+            overrides["scoring"] = {k: cfg["scoring"][k] for k in
+                                    ("below_market_pct", "stale_days", "price_drop_min_pct")}
+        save_overrides(Path(cfg["settings_file"]), overrides)
+
     def data_file(self) -> Path:
         try:
             from .config import load_config
@@ -252,9 +307,10 @@ def make_handler(app: DesktopApp):
                 return self._send(200, body, "text/javascript; charset=utf-8")
             if path == "/api/status":
                 return self._json(app.status())
-            if path == "/api/settings":
+            if path in ("/api/settings", "/api/budget"):
                 try:
-                    return self._json(app.get_settings())
+                    return self._json(app.get_settings() if path == "/api/settings"
+                                      else app.get_budget())
                 except Exception as exc:
                     return self._json({"error": str(exc)}, 500)
             return self._send(404, b"Not found", "text/plain")
@@ -269,17 +325,20 @@ def make_handler(app: DesktopApp):
             if path in ("/api/refresh", "/api/rescore"):
                 started = app.start_job(path.rsplit("/", 1)[1])
                 return self._json({"started": started}, 202 if started else 409)
-            if path == "/api/settings":
-                from .settings import SettingsError
+            if path in ("/api/settings", "/api/budget"):
                 length = int(self.headers.get("Content-Length") or 0)
                 if length <= 0 or length > 20000:
                     return self._json({"error": "Bad request"}, 400)
                 try:
                     payload = json.loads(self.rfile.read(length).decode("utf-8"))
-                    result = app.save_settings(payload)
-                except (SettingsError, ValueError) as exc:
+                    if path == "/api/settings":
+                        result = app.save_settings(payload)
+                    else:
+                        result = app.post_budget(payload)
+                except ValueError as exc:  # SettingsError / BudgetError / bad JSON
                     return self._json({"error": str(exc)}, 400)
-                return self._json(result, 200 if result.get("saved") else 409)
+                busy = result.get("busy")
+                return self._json(result, 409 if busy else 200)
             return self._send(404, b"Not found", "text/plain")
 
     return Handler

@@ -130,6 +130,49 @@
   @keyframes hop { 0%, 100% { transform: rotate(45deg) translate(0, 0); } 50% { transform: rotate(45deg) translate(-5px, -5px); } }
   @media (prefers-reduced-motion: reduce) { .hearts span { animation: none; } .card { transition: none; } }
 
+  /* Satisfying bits */
+  .btn, .chip, .pick button, .addbtn, .xbtn { transition: transform .08s ease, filter .12s, border-color .12s; }
+  .btn:active, .chip:active, .pick button:active, .addbtn:active, .xbtn:active { transform: scale(.94); }
+  .bounce { animation: bounce .35s cubic-bezier(.3, 1.6, .5, 1); }
+  @keyframes bounce { 0% { transform: scale(.88); } 60% { transform: scale(1.08); } 100% { transform: scale(1); } }
+  .iconbtn { border: 2px solid var(--line); background: var(--panel); color: var(--text); border-radius: 999px;
+             width: 40px; height: 40px; display: inline-grid; place-items: center; cursor: pointer; font-size: 17px; }
+  .iconbtn:hover { border-color: var(--pink); }
+  .burst { position: fixed; z-index: 3000; pointer-events: none; left: 0; top: 0; font-size: 18px; line-height: 1;
+           animation: fly 1.1s cubic-bezier(.2, .7, .3, 1) forwards; }
+  @keyframes fly {
+    0% { transform: translate(var(--x0), var(--y0)) scale(.4) rotate(0); opacity: 1; }
+    70% { opacity: 1; }
+    100% { transform: translate(var(--x1), var(--y1)) scale(1) rotate(var(--r)); opacity: 0; }
+  }
+
+  /* Splash */
+  #splash { position: fixed; inset: 0; z-index: 5000; display: grid; place-items: center; cursor: pointer;
+            background: radial-gradient(circle at 50% 40%, #ffe4ee 0%, #ffb8d0 55%, #ff8db5 100%);
+            transition: opacity .45s ease, transform .45s ease; overflow: hidden; }
+  #splash.out { opacity: 0; transform: scale(1.06); pointer-events: none; }
+  .splash-inner { text-align: center; color: #3a2a31; position: relative; z-index: 1; }
+  .splash-logo { width: 150px; height: 150px; margin: 0 auto 18px; border-radius: 40px; background: #fff;
+                 display: grid; place-items: center; box-shadow: 0 16px 40px rgba(214, 51, 108, .35);
+                 animation: hopin .9s cubic-bezier(.3, 1.5, .5, 1) both; }
+  .splash-logo svg { animation: wiggle 1.6s ease-in-out .9s infinite; }
+  .splash-inner h1 { margin: 0; font: 800 40px/1.1 var(--font-display); letter-spacing: -.01em;
+                     animation: rise .6s ease .35s both; }
+  .splash-inner h1 .heart { color: #e60026; display: inline-block; animation: beat 1s ease-in-out 1s infinite; }
+  .splash-inner p { margin: 8px 0 18px; font-size: 16px; color: #8c4a64; animation: rise .6s ease .55s both; }
+  .splash-inner .hearts { animation: rise .6s ease .7s both; }
+  .floaty { position: absolute; bottom: -40px; font-size: 22px; opacity: .8; animation: floatup linear infinite; }
+  @keyframes hopin { 0% { transform: translateY(40px) scale(.6); opacity: 0; } 100% { transform: none; opacity: 1; } }
+  @keyframes rise { 0% { transform: translateY(14px); opacity: 0; } 100% { transform: none; opacity: 1; } }
+  @keyframes wiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
+  @keyframes beat { 0%, 100% { transform: scale(1); } 30% { transform: scale(1.25); } }
+  @keyframes floatup { 0% { transform: translateY(0) rotate(0); } 100% { transform: translateY(-110vh) rotate(40deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .splash-logo, .splash-logo svg, .splash-inner h1, .splash-inner h1 .heart, .splash-inner p, .splash-inner .hearts, .floaty, .bounce { animation: none !important; }
+    .floaty { display: none; }
+    .btn:active, .chip:active, .pick button:active { transform: none; }
+  }
+
   /* Step buttons */
   .btn.step .num { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
                    background: var(--pink-strong); color: var(--on-pink); font-size: 12.5px; font-weight: 700; }
@@ -209,6 +252,16 @@
 </style>
 </head>
 <body>
+<div id="splash" role="presentation" title="Click to skip">
+  <div class="splash-inner">
+    <div class="splash-logo">
+      <svg viewBox="0 0 64 40" width="104" height="65" aria-hidden="true"><path d="M32 20C22 6 6 2 4 12s6 22 28 8zM32 20C42 6 58 2 60 12s-6 22-28 8z" fill="#e60026" stroke="#b0001e" stroke-width="1.5" stroke-linejoin="round"/><ellipse cx="32" cy="20" rx="7" ry="8" fill="#e60026" stroke="#fff" stroke-width="2.5"/></svg>
+    </div>
+    <h1>Bebe's Home Search <span class="heart">♥</span></h1>
+    <p id="splashMsg">finding the cutest deals…</p>
+    <div class="hearts" aria-hidden="true"><span></span><span></span><span></span></div>
+  </div>
+</div>
 <header>
   <div class="logo" aria-hidden="true">
     <svg viewBox="0 0 64 40" width="40" height="26"><path d="M32 20C22 6 6 2 4 12s6 22 28 8zM32 20C42 6 58 2 60 12s-6 22-28 8z" fill="#e60026" stroke="#b0001e" stroke-width="1.5" stroke-linejoin="round"/><ellipse cx="32" cy="20" rx="7" ry="8" fill="#e60026" stroke="#fff" stroke-width="2.5"/></svg>
@@ -219,6 +272,7 @@
   </div>
   <div class="head-right">
     <span class="pill" id="usage" hidden></span>
+    <button class="iconbtn" id="muteBtn" data-quiet title="Sounds on/off" aria-label="Sounds on" aria-pressed="false">🔊</button>
     <button class="btn step" id="budgetBtn" hidden><span class="num">1</span> Budget <b id="budgetAmt"></b></button>
     <button class="btn step" id="settingsBtn" hidden><span class="num">2</span>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
@@ -381,6 +435,132 @@
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const money = (n) => n == null ? "?" : "$" + Math.round(n).toLocaleString();
   const safeUrl = (u) => (typeof u === "string" && /^https?:\/\//i.test(u) ? u : null);
+  const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // --- Sounds: tiny synthesized blips (no audio files). Muting is remembered.
+  const Sound = (() => {
+    let ctx = null, master = null;
+    let muted = false;
+    try { muted = localStorage.getItem("hf-muted") === "1"; } catch { /* storage blocked */ }
+    function ac() {
+      if (muted) return null;
+      const C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return null;
+      if (!ctx) {
+        ctx = new C();
+        master = ctx.createGain(); master.gain.value = 0.7;
+        const soften = ctx.createBiquadFilter(); soften.type = "lowpass"; soften.frequency.value = 6000;
+        master.connect(soften).connect(ctx.destination);
+      }
+      if (ctx.state === "suspended") ctx.resume().catch(() => {});
+      return ctx;
+    }
+    function tone(freq, at, dur, { type = "sine", vol = 0.14, to = null } = {}) {
+      const c = ac(); if (!c) return;
+      const t = c.currentTime + at;
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(master); o.start(t); o.stop(t + dur + 0.05);
+    }
+    const bell = (f, at, dur = 0.5, vol = 0.12) => { tone(f, at, dur, { vol }); tone(f * 2, at, dur * 0.6, { vol: vol * 0.25, type: "triangle" }); };
+    const N = { C5: 523.25, E5: 659.25, G5: 783.99, A5: 880, C6: 1046.5, D6: 1174.66, E6: 1318.5, G6: 1568, C7: 2093 };
+    return {
+      get muted() { return muted; },
+      setMuted(m) { muted = m; try { localStorage.setItem("hf-muted", m ? "1" : "0"); } catch {} if (!m) this.pop(); },
+      unlock() { ac(); },
+      tap() { tone(1400, 0, 0.035, { vol: 0.05 }); },
+      pop() { tone(620, 0, 0.1, { type: "triangle", to: 1050, vol: 0.13 }); },
+      unpop() { tone(820, 0, 0.09, { type: "triangle", to: 480, vol: 0.1 }); },
+      whoosh() { tone(260, 0, 0.18, { to: 820, vol: 0.05 }); tone(1600, 0.1, 0.12, { vol: 0.03 }); },
+      select() { tone(880, 0, 0.06, { vol: 0.07 }); tone(1320, 0.05, 0.08, { vol: 0.05 }); },
+      chime() { [N.C6, N.E6, N.G6].forEach((f, i) => bell(f, i * 0.07, 0.45, 0.1)); bell(N.C7, 0.24, 0.6, 0.05); },
+      tada() { [N.C5, N.E5, N.G5, N.C6].forEach((f, i) => bell(f, i * 0.09, 0.5, 0.11)); [N.E6, N.G6, N.C7].forEach((f, i) => tone(f, 0.42 + i * 0.05, 0.3, { vol: 0.04 })); },
+      open() { [N.G5, N.C6, N.E6, N.G6].forEach((f, i) => bell(f, 0.05 + i * 0.12, 0.55, 0.09)); [N.C7, N.D6 * 2, N.C7].forEach((f, i) => tone(f, 0.6 + i * 0.06, 0.25, { vol: 0.03 })); },
+      error() { tone(440, 0, 0.14, { type: "triangle", vol: 0.1 }); tone(330, 0.12, 0.2, { type: "triangle", vol: 0.1 }); },
+    };
+  })();
+
+  // --- Hearts & bows burst for big moments
+  function burst(x, y, n = 22) {
+    if (REDUCED) return;
+    const bits = ["♥", "♥", "🎀", "✨", "♥", "🌸"];
+    for (let i = 0; i < n; i++) {
+      const s = document.createElement("span");
+      s.className = "burst";
+      s.textContent = bits[i % bits.length];
+      const a = Math.random() * Math.PI * 2, d = 80 + Math.random() * 140;
+      s.style.setProperty("--x0", `${x}px`); s.style.setProperty("--y0", `${y}px`);
+      s.style.setProperty("--x1", `${x + Math.cos(a) * d}px`); s.style.setProperty("--y1", `${y + Math.sin(a) * d - 40}px`);
+      s.style.setProperty("--r", `${(Math.random() - 0.5) * 120}deg`);
+      s.style.color = ["#e60026", "#d6336c", "#ff8db5"][i % 3];
+      s.style.fontSize = `${14 + Math.random() * 14}px`;
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 1200);
+    }
+  }
+  const burstAt = (el) => { const r = el.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2); };
+  const bounce = (el) => { el.classList.remove("bounce"); void el.offsetWidth; el.classList.add("bounce"); };
+
+  // Gentle tap on every button that doesn't make its own sound.
+  document.addEventListener("click", (e) => {
+    Sound.unlock();
+    const b = e.target.closest("button");
+    if (b && !b.closest(".pick") && !b.matches(".chip, .xbtn, .addbtn, [data-quiet]")) Sound.tap();
+  }, true);
+
+  // --- Splash: shows until data is ready (at least 1.8s, at most 4s); click skips.
+  const splash = (() => {
+    const el = $("splash");
+    if (!REDUCED) {
+      for (let i = 0; i < 14; i++) {
+        const f = document.createElement("span");
+        f.className = "floaty";
+        f.textContent = ["♥", "🎀", "✨", "♥", "🌸", "♥", "🏠"][i % 7];
+        f.style.left = `${Math.random() * 100}%`;
+        f.style.animationDuration = `${5 + Math.random() * 5}s`;
+        f.style.animationDelay = `${-Math.random() * 6}s`;
+        f.style.color = ["#e60026", "#d6336c", "#fff"][i % 3];
+        el.appendChild(f);
+      }
+    }
+    const shownAt = Date.now();
+    let ready = false, gone = false;
+    const after = [];
+    const hide = () => {
+      if (gone) return; gone = true;
+      el.classList.add("out");
+      setTimeout(() => { el.remove(); after.splice(0).forEach((fn) => fn()); }, 450);
+    };
+    const tryHide = () => { if (ready && Date.now() - shownAt >= 1800) hide(); };
+    el.addEventListener("click", () => { Sound.unlock(); hide(); });
+    setTimeout(tryHide, 1850);
+    setTimeout(hide, 4000);
+    Sound.open();  // plays in the app window; browsers may hold it until the first click
+    return {
+      ready() { ready = true; tryHide(); },
+      // Run fn once the splash has faded away (or now, if it already has).
+      then(fn) { if (gone && !document.getElementById("splash")) fn(); else after.push(fn); },
+    };
+  })();
+
+  // Count a number up/down to its new value (budget amount).
+  function countTo(el, to) {
+    const from = +(el.dataset.v || 0);
+    el.dataset.v = to;
+    if (REDUCED || from === to) { el.textContent = money(to) + "/mo"; return; }
+    const t0 = performance.now(), dur = 450;
+    const step = (t) => {
+      const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = money(from + (to - from) * e) + "/mo";
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
   const FLAG_LABELS = { below_market: "♥ Below market", price_drop: "Price drop", stale: "Long on market", cheapest_site: "Cheapest across sites" };
   const PINK = "#d6336c", BOW = "#e60026", GREY = "#c9a3b3";
 
@@ -525,6 +705,7 @@
   }
 
   function select(id, pan) {
+    if (state.selected !== id) Sound.select();
     state.selected = id; render();
     const el = document.querySelector(`.card[data-id="${CSS.escape(id)}"]`);
     if (el && !pan) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -539,7 +720,9 @@
     const b = e.target.closest("button"); if (!b) return;
     const f = b.dataset.flag;
     state.flags.has(f) ? state.flags.delete(f) : state.flags.add(f);
-    b.setAttribute("aria-pressed", state.flags.has(f)); render();
+    b.setAttribute("aria-pressed", state.flags.has(f));
+    state.flags.has(f) ? Sound.pop() : Sound.unpop(); bounce(b);
+    render();
   });
   ["onlyMatch", "maxRent", "sort"].forEach((id) => $(id).addEventListener("input", render));
   $("list").addEventListener("click", (e) => {
@@ -549,6 +732,7 @@
 
   // --- dialogs
   function dialog(title, bodyHtml, actions) {
+    if ($("overlay").hidden) Sound.whoosh();
     $("dlgTitle").textContent = title;
     $("dlgBody").innerHTML = bodyHtml;
     $("dlgActions").innerHTML = "";
@@ -599,7 +783,9 @@
           const n = state.D ? state.D.listings.filter((l) => l.passes_filters).length : 0;
           dialog("All done! ♥", `<p>${n} homes match what you're looking for.</p><div class="log">${esc(s.job.log.join("\n"))}</div>`,
             [["Yay!", "primary", closeDialog]]);
+          Sound.tada(); burstAt(document.querySelector("#overlay .dialog"));
         } else {
+          Sound.error();
           dialog("Something went wrong", `<p>Here's what happened:</p><div class="log">${esc(s.job.log.join("\n"))}</div>`,
             [["Close", "primary", closeDialog]]);
         }
@@ -644,6 +830,8 @@
       const b = e.target.closest("button"); if (!b) return;
       if (!multi) el.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", "false"));
       b.setAttribute("aria-pressed", multi ? String(b.getAttribute("aria-pressed") !== "true") : "true");
+      b.getAttribute("aria-pressed") === "true" ? Sound.pop() : Sound.unpop();
+      bounce(b);
       if (el.onpick) el.onpick(b);
     };
   }
@@ -688,6 +876,7 @@
       dialog("Setup needed", `<p>${esc(e.message)}</p>`, [["OK", "primary", closeDialog]]); return;
     }
     $("setError").textContent = "";
+    Sound.whoosh();
     pickGroup($("setBeds"), c.options.beds.map((b) => [b, BED_LABELS[b]]), c.beds, true);
     const b = BUD.result && BUD.result.budget;
     $("rentHint").innerHTML = b != null
@@ -747,8 +936,9 @@
     $("setSave").disabled = true; $("setError").textContent = "";
     try {
       const r = await api("api/settings", "POST", payload);
-      if (r.status === 409) { $("setError").textContent = "Busy with a search. Try again in a moment."; return; }
-      if (r.status !== 200) { $("setError").textContent = r.body.error || "Couldn't save"; return; }
+      if (r.status === 409) { Sound.error(); $("setError").textContent = "Busy with a search. Try again in a moment."; return; }
+      if (r.status !== 200) { Sound.error(); $("setError").textContent = r.body.error || "Couldn't save"; return; }
+      Sound.chime(); burstAt($("setSave"));
       closeSettings();
       await loadSettings();
       await runJob("rescore", true);
@@ -825,12 +1015,15 @@
       moveLine = `<div class="movein-line">🔑 Move-in at ${money(r.budget)} rent ≈ ${money(mi.at_budget)}. Add your savings above to check it.</div>`;
     }
     el.innerHTML = `
-      <div class="bigbudget"><span>Your rent budget:</span><span class="amt">${money(r.budget)}/mo</span>
+      <div class="bigbudget"><span>Your rent budget:</span><span class="amt" id="budAmt" data-v="${lastShownBudget}">${money(lastShownBudget)}/mo</span>
         <span class="sub">the lowest of the three (${esc(lowLabel)})</span></div>
       <div class="methods">${r.methods.map((m) => `<div class="method ${m.key === r.limited_by ? "low" : ""}">
         <div class="m-label">${esc(m.label)}</div><div class="m-amt">${money(m.amount)}</div><div class="m-how">${esc(m.how)}</div></div>`).join("")}</div>
       ${moveLine}`;
+    countTo($("budAmt"), r.budget);
+    lastShownBudget = r.budget;
   }
+  let lastShownBudget = 0;
 
   let calcTimer = null;
   function recalc() {
@@ -871,6 +1064,7 @@
     $("budError").textContent = "";
     renderResults(BUD.result);
     $("budget").hidden = false;
+    Sound.whoosh();
     recalc();
     const first = $("earners").querySelector(".e-name");
     if (first) first.focus();
@@ -882,12 +1076,12 @@
     const x = e.target.closest(".xbtn");
     if (x) {
       const row = x.closest(".brow");
-      if (row.classList.contains("earner") && $("earners").children.length === 1) return; // keep one
-      row.remove(); recalc();
+      if (row.classList.contains("earner") && $("earners").children.length === 1) { Sound.error(); return; } // keep one
+      Sound.unpop(); row.remove(); recalc();
     }
   });
-  $("addEarner").addEventListener("click", () => { $("earners").appendChild(earnerRow()); $("earners").lastElementChild.querySelector(".e-name").focus(); });
-  $("addBill").addEventListener("click", () => { $("bills").appendChild(billRow()); $("bills").lastElementChild.querySelector(".b-name").focus(); });
+  $("addEarner").addEventListener("click", () => { Sound.pop(); $("earners").appendChild(earnerRow()); bounce($("earners").lastElementChild); $("earners").lastElementChild.querySelector(".e-name").focus(); });
+  $("addBill").addEventListener("click", () => { Sound.pop(); $("bills").appendChild(billRow()); bounce($("bills").lastElementChild); $("bills").lastElementChild.querySelector(".b-name").focus(); });
   const closeBudget = () => ($("budget").hidden = true);
   $("budCancel").addEventListener("click", closeBudget);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("budget").hidden) closeBudget(); });
@@ -898,8 +1092,9 @@
     $("budSave").disabled = $("budApply").disabled = true;
     try {
       const r = await api("api/budget", "POST", { action, budget: collectBudget() });
-      if (r.status === 409) { $("budError").textContent = "Busy with a search. Try again in a moment."; return null; }
-      if (r.status !== 200) { $("budError").textContent = r.body.error || "Couldn't save"; return null; }
+      if (r.status === 409) { Sound.error(); $("budError").textContent = "Busy with a search. Try again in a moment."; return null; }
+      if (r.status !== 200) { Sound.error(); $("budError").textContent = r.body.error || "Couldn't save"; return null; }
+      Sound.chime(); burstAt(action === "apply" ? $("budApply") : $("budSave"));
       await loadBudget();
       return r.body;
     } finally {
@@ -921,14 +1116,23 @@
   // --- start
   if (DESKTOP) {
     $("budgetBtn").hidden = false;
-    loadBudget().then((b) => { if (!b.budget) openBudget(); render(); }).catch(() => {});
+    loadBudget().then((b) => { if (!b.budget) splash.then(openBudget); render(); }).catch(() => {});
     $("refreshBtn").hidden = false; $("rescoreBtn").hidden = false; $("settingsBtn").hidden = false;
     loadSettings().catch(() => {});
     refreshStatus().then((s) => { if (s && s.job.running) runJob(s.job.kind); });
     // Heartbeat: lets the app quit cleanly after the window is closed.
     setInterval(() => fetch("api/ping", { method: "POST", headers: { "X-Token": TOKEN } }).catch(() => {}), 10000);
   }
-  loadData().then((D) => { state.D = D; render(); });
+  // Sounds on/off
+  const muteIcon = () => {
+    $("muteBtn").textContent = Sound.muted ? "🔇" : "🔊";
+    $("muteBtn").setAttribute("aria-pressed", String(Sound.muted));
+    $("muteBtn").setAttribute("aria-label", Sound.muted ? "Sounds off" : "Sounds on");
+  };
+  $("muteBtn").addEventListener("click", () => { Sound.setMuted(!Sound.muted); muteIcon(); bounce($("muteBtn")); });
+  muteIcon();
+
+  loadData().then((D) => { state.D = D; render(); splash.ready(); });
 })();
 </script>
 </body>

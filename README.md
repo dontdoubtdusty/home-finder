@@ -79,6 +79,10 @@ The dashboard is `dashboard/index.html`. Open it directly from disk; no server n
 2. **Search**: starts with the budget as the max rent. Listing cards show
    "Over budget" and the estimated move-in cost vs. your savings.
 
+It opens with a splash screen and has soft sound effects (pops, chimes, a "ta-da"
+when a search finishes). They're made in the browser, with no audio files. Turn
+them off with the 🔊 button; the choice is remembered.
+
 Other buttons: **Find new listings** (one RentCast request) and **Re-rank** (no API use).
 The **Search** screen covers bedrooms (pick any of Studio/1/2/3/4+), rent,
 bathrooms, pets, must-have and nice-to-have amenities, deal-tag strictness, and the

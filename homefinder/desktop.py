@@ -373,6 +373,8 @@ def open_window(url: str) -> Optional[subprocess.Popen]:
     return subprocess.Popen([
         browser, f"--app={url}", f"--user-data-dir={profile}", "--window-size=1320,880",
         "--no-first-run", "--no-default-browser-check", "--disable-features=Translate",
+        # Let the splash screen's opening jingle play without a click first.
+        "--autoplay-policy=no-user-gesture-required",
     ])
 
 

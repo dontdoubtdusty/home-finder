@@ -165,6 +165,20 @@ class Database:
             out.append(d)
         return out
 
+    def listing_starts(self) -> List[Dict[str, Any]]:
+        """Every listing ever seen (active or not) with its first asking price.
+
+        Used for the "when to move" page's month-by-month price pattern.
+        """
+        rows = self.conn.execute(
+            "SELECT l.id, l.beds, l.listed_date, l.first_seen, l.price, "
+            "(SELECT h.price FROM price_history h WHERE h.listing_id = l.id "
+            " ORDER BY h.observed LIMIT 1) AS first_price FROM listings l"
+        ).fetchall()
+        return [{"beds": r["beds"], "listed_date": r["listed_date"], "first_seen": r["first_seen"],
+                 "price": r["first_price"] if r["first_price"] is not None else r["price"]}
+                for r in rows]
+
     def _history_by_listing(self) -> Dict[str, List[Dict[str, Any]]]:
         out: Dict[str, List[Dict[str, Any]]] = {}
         for row in self.conn.execute(

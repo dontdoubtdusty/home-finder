@@ -83,6 +83,12 @@ It opens with a splash screen and has soft sound effects (pops, chimes, a "ta-da
 when a search finishes). They're made in the browser, with no audio files. Turn
 them off with the 🔊 button; the choice is remembered.
 
+**📅 When to move** shows the best and worst months to move in around Christiansburg,
+Blacksburg and Radford (winter is cheapest; late July and August, with Virginia Tech and
+Radford move-in, are worst), key local dates, moving tips, and a chart of how
+asking rents in your own saved listings change by month (it appears once a few
+months of data are collected).
+
 Other buttons: **Find new listings** (one RentCast request) and **Re-rank** (no API use).
 The **Search** screen covers bedrooms (pick any of Studio/1/2/3/4+), rent,
 bathrooms, pets, must-have and nice-to-have amenities, deal-tag strictness, and the

@@ -12,6 +12,7 @@
     --line: #f7d3e0; --pink: #ff8db5; --pink-strong: #d6336c; --soft: #ffe4ee;
     --bow: #e60026; --bow-dark: #b0001e; --yellow: #ffd23f; --yellow-text: #8a6200;
     --berry: #9b4dca; --ok: #2f8a57; --on-pink: #ffffff;
+    --r-best: #d6336c; --r-good: #ffaac8; --r-ok: #ffe4ee;
     --shadow: 0 8px 24px rgba(214, 51, 108, .12); --shadow-sm: 0 2px 8px rgba(214, 51, 108, .08);
     --font: "Segoe UI Variable Text", "Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
     --font-display: "Segoe UI Variable Display", "Segoe UI", Roboto, system-ui, sans-serif;
@@ -22,6 +23,7 @@
       --line: #46303a; --pink: #ff8db5; --pink-strong: #ff9cc0; --soft: #3a2530;
       --bow: #ff4d6d; --bow-dark: #ff4d6d; --yellow: #ffd23f; --yellow-text: #ffd96a;
       --berry: #d3a4f0; --ok: #7fd6a2; --on-pink: #2a1018;
+      --r-best: #ff9cc0; --r-good: #8f3d5e; --r-ok: #3a2530;
       --shadow: 0 8px 24px rgba(0,0,0,.45); --shadow-sm: 0 2px 8px rgba(0,0,0,.35);
     }
   }
@@ -30,6 +32,7 @@
     --line: #46303a; --pink: #ff8db5; --pink-strong: #ff9cc0; --soft: #3a2530;
     --bow: #ff4d6d; --bow-dark: #ff4d6d; --yellow: #ffd23f; --yellow-text: #ffd96a;
     --berry: #d3a4f0; --ok: #7fd6a2; --on-pink: #2a1018;
+      --r-best: #ff9cc0; --r-good: #8f3d5e; --r-ok: #3a2530;
     --shadow: 0 8px 24px rgba(0,0,0,.45); --shadow-sm: 0 2px 8px rgba(0,0,0,.35);
   }
   * { box-sizing: border-box; }
@@ -213,6 +216,44 @@
     .brow.earner .xbtn { grid-column: 2; justify-self: end; }
   }
 
+  /* When to move */
+  .now-banner { display: flex; gap: 14px; align-items: center; padding: 14px 16px; border-radius: 18px;
+                background: var(--soft); border: 2px solid var(--line); margin: 4px 0 4px; }
+  .now-banner .big { font-size: 30px; line-height: 1; }
+  .now-banner b { font: 700 17px var(--font-display); }
+  .months { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; margin: 4px 0 8px; }
+  .month { border: 0; border-radius: 12px; padding: 8px 2px 7px; cursor: pointer; font: inherit; text-align: center;
+           display: grid; gap: 2px; color: var(--text); min-width: 0; }
+  .month .mn { font-weight: 700; font-size: 13px; }
+  .month .mr { font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .month .mi { font-size: 15px; line-height: 1.1; }
+  .month.r-best { background: var(--r-best); color: var(--on-pink); }
+  .month.r-good { background: var(--r-good); }
+  .month.r-ok { background: var(--r-ok); }
+  .month.r-avoid { background: var(--panel); outline: 2px dashed var(--bow-dark); outline-offset: -2px; color: var(--bow-dark); }
+  .month[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--panel), 0 0 0 5px var(--text); }
+  .month.now .mn::after { content: " •"; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 4px; vertical-align: -1px; margin-right: 4px; }
+  .month-detail { border: 2px solid var(--line); border-radius: 16px; padding: 12px 14px; min-height: 96px; }
+  .month-detail h4 { margin: 0 0 4px; font: 700 16px var(--font-display); }
+  .month-detail ul { margin: 6px 0 0; padding: 0; list-style: none; }
+  .month-detail li { margin: 3px 0; }
+  .dates { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .dates li { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 10px; align-items: baseline; }
+  .dates .d { font-weight: 700; color: var(--pink-strong); font-variant-numeric: tabular-nums; }
+  .tips { margin: 0; padding-left: 20px; } .tips li { margin: 6px 0; }
+  .savings { font-weight: 600; }
+  .sources { font-size: 12px; color: var(--muted); } .sources a { color: var(--muted); }
+  .chart-wrap { position: relative; }
+  .chart-wrap svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .chart-tip { position: absolute; pointer-events: none; background: var(--panel); border: 2px solid var(--line);
+               border-radius: 10px; padding: 6px 9px; font-size: 12px; box-shadow: var(--shadow-sm); white-space: nowrap; }
+  @media (max-width: 640px) {
+    .months { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .dates li { grid-template-columns: 1fr; gap: 0; }
+  }
+
   /* Settings screen */
   .summary-chip { background: var(--soft); border-color: var(--pink); color: var(--pink-strong); font-weight: 600; }
   .dialog.wide { width: min(780px, 100%); max-height: 90vh; display: flex; flex-direction: column; padding: 0; }
@@ -273,6 +314,7 @@
   <div class="head-right">
     <span class="pill" id="usage" hidden></span>
     <button class="iconbtn" id="muteBtn" data-quiet title="Sounds on/off" aria-label="Sounds on" aria-pressed="false">🔊</button>
+    <button class="btn" id="whenBtn" title="Best and worst times to move in around here">📅 When to move</button>
     <button class="btn step" id="budgetBtn" hidden><span class="num">1</span> Budget <b id="budgetAmt"></b></button>
     <button class="btn step" id="settingsBtn" hidden><span class="num">2</span>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
@@ -312,6 +354,75 @@
     <h2 id="dlgTitle"></h2>
     <div id="dlgBody"></div>
     <div class="actions" id="dlgActions"></div>
+  </div>
+</div>
+
+<div class="overlay" id="when" hidden>
+  <div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="whenTitle">
+    <div class="dlg-head">
+      <span style="font-size:28px" aria-hidden="true">📅</span>
+      <div><h2 id="whenTitle" style="margin:0">Best &amp; worst times to move in</h2>
+        <div class="sub">Christiansburg, Blacksburg &amp; Radford (the New River Valley)</div></div>
+    </div>
+    <div class="dlg-scroll">
+      <div class="now-banner" id="whenNow"></div>
+
+      <section class="set-section">
+        <h3>Month by month</h3>
+        <p class="hint">Tap a month to see why. Around here the college calendar (Virginia Tech and Radford) matters as much as the season.</p>
+        <div class="legend" id="whenLegend"></div>
+        <div class="months" id="whenMonths" role="group" aria-label="Months"></div>
+        <div class="month-detail" id="whenDetail" aria-live="polite"></div>
+      </section>
+
+      <section class="set-section">
+        <h3>What waiting for winter could save</h3>
+        <p id="whenSave" style="margin:0"></p>
+      </section>
+
+      <section class="set-section">
+        <h3>Local dates to plan around</h3>
+        <ul class="dates">
+          <li><span class="d">Aug 18–20, 2026</span><span>Virginia Tech move-in for first-year and transfer students</span></li>
+          <li><span class="d">Aug 21–23, 2026</span><span>Virginia Tech move-in for returning students. Radford's dorms also open around Aug 21 (unofficial date)</span></li>
+          <li><span class="d">Aug 24, 2026</span><span>Virginia Tech fall classes start</span></li>
+          <li><span class="d">Oct–Nov</span><span>Student complexes near VT pre-lease next fall (fall 2027 is already over 60% signed at some). This matters only if you want a student-style place</span></li>
+          <li><span class="d">May 8–15, 2027</span><span>Virginia Tech graduation week (main ceremony Fri, May 14). Graduates move out: more places open up, but trucks, movers and hotels are busy</span></li>
+        </ul>
+        <p class="hint" style="margin-top:8px">The dates change every year. Check vt.edu and radford.edu for next year's.</p>
+      </section>
+
+      <section class="set-section">
+        <h3>Tips for an easier, cheaper move</h3>
+        <ul class="tips">
+          <li><b>Move on a weekday in the middle of the month</b> (the 10th to the 20th). Weekend moves can cost 10–30% more, and the start and end of the month are busiest because most leases turn over then.</li>
+          <li><b>From May to September, book the movers or truck 6–8 weeks ahead.</b> Around VT move-in week, book even earlier.</li>
+          <li><b>Watch for 10- and 11-month student leases</b> (August to June) near campus. They're fine if you want one, but check the end date.</li>
+          <li><b>Try to make your lease end in winter.</b> Then your <i>next</i> move or renewal also lands in the cheap season.</li>
+          <li><b>Ask about a move-in special from November to February.</b> Landlords with empty units in winter are more willing to bargain: a free month, a lower deposit, or waived fees.</li>
+          <li><b>Plan a backup day in winter.</b> Christiansburg gets about 20 inches of snow a year, and some complexes are on steep hills.</li>
+        </ul>
+      </section>
+
+      <section class="set-section">
+        <h3>What your own listings show</h3>
+        <div id="whenChart"></div>
+      </section>
+
+      <p class="sources" style="margin:12px 0 4px">Sources:
+        <a href="https://www.zumper.com/blog/seasonal-rent-trends-the-best-time-of-year-to-rent/" target="_blank" rel="noopener">Zumper seasonal rents</a> ·
+        <a href="https://www.zillow.com/learn/when-is-the-best-time-to-rent-an-apartment" target="_blank" rel="noopener">Zillow</a> ·
+        <a href="https://www.apartmentlist.com/research/best-time-of-year-to-rent" target="_blank" rel="noopener">Apartment List</a> ·
+        <a href="https://housing.vt.edu/experience/movein.html" target="_blank" rel="noopener">VT move-in</a> ·
+        <a href="https://commencement.vt.edu/faqs/spring.html" target="_blank" rel="noopener">VT commencement</a> ·
+        <a href="https://acadcalendar.com/radford-academic-calendar/" target="_blank" rel="noopener">Radford calendar (unofficial)</a> ·
+        <a href="https://campuslife.vt.edu/content/dam/campuslife_vt_edu/assets/docs/vtoch_ShortTermHousing.pdf" target="_blank" rel="noopener">VT off-campus leases</a> ·
+        <a href="https://www.collegiatetimes.com/article/the-suite-life-off-campus-the-rise-of-luxury-living-in-blacksburg-20261027" target="_blank" rel="noopener">Collegiate Times on pre-leasing</a> ·
+        <a href="https://www.freightwaves.com/checkpoint/when-is-peak-moving-season/" target="_blank" rel="noopener">peak moving season</a> ·
+        <a href="https://www.weather.gov/rnk/" target="_blank" rel="noopener">NWS Blacksburg</a>.
+        The seasonal price data is national; local prices may differ.</p>
+    </div>
+    <div class="actions"><button class="btn primary" id="whenClose">Close</button></div>
   </div>
 </div>
 
@@ -509,7 +620,7 @@
   document.addEventListener("click", (e) => {
     Sound.unlock();
     const b = e.target.closest("button");
-    if (b && !b.closest(".pick") && !b.matches(".chip, .xbtn, .addbtn, [data-quiet]")) Sound.tap();
+    if (b && !b.closest(".pick") && !b.matches(".chip, .xbtn, .addbtn, .month, [data-quiet]")) Sound.tap();
   }, true);
 
   // --- Splash: shows until data is ready (at least 1.8s, at most 4s); click skips.
@@ -1123,6 +1234,137 @@
     // Heartbeat: lets the app quit cleanly after the window is closed.
     setInterval(() => fetch("api/ping", { method: "POST", headers: { "X-Token": TOKEN } }).catch(() => {}), 10000);
   }
+  // --- When to move (researched for the New River Valley; see the sources on the page)
+  const RATINGS = {
+    best: { label: "Best", icon: "💖" }, good: { label: "Good", icon: "👍" },
+    ok: { label: "Okay", icon: "🙂" }, avoid: { label: "Avoid", icon: "⚠️" },
+  };
+  const MONTHS = [
+    { n: "Jan", full: "January", r: "best", head: "One of the cheapest months to rent",
+      pro: ["Rents are usually at their lowest (national data: January is often the cheapest month)", "Few other people are looking, so landlords with empty units bargain", "Movers are in their slow season"],
+      con: ["Snow and ice are most likely. Keep a backup day", "Fewer places to choose from"] },
+    { n: "Feb", full: "February", r: "best", head: "Still cheap and quiet",
+      pro: ["Winter prices and little competition", "A good time to ask for a free month or a lower deposit"],
+      con: ["Snow risk, especially on hilly streets", "Fewer listings than in spring"] },
+    { n: "Mar", full: "March", r: "good", head: "The tail end of the cheap season",
+      pro: ["Still off-peak for movers", "Better weather; more listings start appearing"],
+      con: ["Prices begin climbing toward summer"] },
+    { n: "Apr", full: "April", r: "ok", head: "Spring demand picks up",
+      pro: ["More places listed"],
+      con: ["Prices rising", "Places near campus are mostly already leased for fall"] },
+    { n: "May", full: "May", r: "ok", head: "Graduation shuffle",
+      pro: ["Graduates move out, so more places open up, plus summer sublets"],
+      con: ["Graduation week (May 8–15, 2027) packs trucks, movers and hotels", "Peak moving season starts mid-May"] },
+    { n: "Jun", full: "June", r: "ok", head: "Lots of choice, higher prices",
+      pro: ["Many 10- and 11-month student leases end, so there's plenty to pick from"],
+      con: ["Summer rents are among the year's highest", "Moving companies are at peak prices"] },
+    { n: "Jul", full: "July", r: "avoid", head: "Peak prices, peak competition",
+      pro: ["Lots of listings"],
+      con: ["Rents near their yearly high", "Students and new hires lock places in for August", "Book movers 6–8 weeks ahead"] },
+    { n: "Aug", full: "August", r: "avoid", head: "The worst month here",
+      pro: [],
+      con: ["Virginia Tech move-in (Aug 18–23, 2026) and Radford move-in (~Aug 21) flood the area", "Trucks and movers sell out; traffic is heavy around campus", "Nationally, August is often the priciest month to rent"] },
+    { n: "Sep", full: "September", r: "ok", head: "The dust settles",
+      pro: ["Landlords with places still empty after the student rush may lower prices"],
+      con: ["Prices are still near summer levels", "Moving season runs to mid-September"] },
+    { n: "Oct", full: "October", r: "good", head: "The cheap season begins",
+      pro: ["Movers drop out of peak season", "Rents start easing", "Nice moving weather"],
+      con: ["Fewer new listings than summer"] },
+    { n: "Nov", full: "November", r: "good", head: "Quiet and getting cheaper",
+      pro: ["Some data puts November among the cheapest months", "Holiday season means less competition"],
+      con: ["Avoid Thanksgiving week: offices close and family plans get in the way"] },
+    { n: "Dec", full: "December", r: "best", head: "Cheapest time of the year",
+      pro: ["National data: rent in December runs about 4.5% below July", "Landlords want units filled before the new year"],
+      con: ["The holidays make scheduling harder", "Possible snow late in the month"] },
+  ];
+  let whenSel = new Date().getMonth();
+  function renderWhen() {
+    const now = new Date().getMonth(), m = MONTHS[now], R = RATINGS[m.r];
+    const nextBest = MONTHS.map((x, i) => ({ ...x, i })).filter((x) => x.r === "best")
+      .sort((a, b) => ((a.i - now + 12) % 12) - ((b.i - now + 12) % 12))[0];
+    const verdict = { best: "is one of the best times to move", good: "is a good time to move",
+                      ok: "is an okay time to move", avoid: "is one of the worst times to move" }[m.r];
+    $("whenNow").innerHTML = `<span class="big" aria-hidden="true">${R.icon}</span>
+      <div><b>Right now (${m.full}) ${verdict}.</b><div class="sub">${esc(m.head)}${m.r === "best" ? "" :
+        `. ${((nextBest.i - now + 12) % 12) === 1 ? "The cheapest stretch (December to February) starts next month."
+          : `The cheapest stretch is December to February, ${(nextBest.i - now + 12) % 12} months away.`}`}</div></div>`;
+    $("whenLegend").innerHTML = Object.entries(RATINGS).map(([k, v]) =>
+      `<span><i style="${k === "avoid" ? "outline:2px dashed var(--bow-dark);outline-offset:-2px;background:var(--panel)" : `background:var(--r-${k})`}"></i>${v.icon} ${v.label}</span>`).join("") +
+      `<span>• = this month</span>`;
+    $("whenMonths").innerHTML = MONTHS.map((x, i) => `<button class="month r-${x.r}${i === now ? " now" : ""}" data-i="${i}"
+        aria-pressed="${i === whenSel}" aria-label="${x.full}: ${RATINGS[x.r].label}${i === now ? " (this month)" : ""}">
+        <span class="mn">${x.n}</span><span class="mi" aria-hidden="true">${RATINGS[x.r].icon}</span><span class="mr">${RATINGS[x.r].label}</span></button>`).join("");
+    const s = MONTHS[whenSel];
+    $("whenDetail").innerHTML = `<h4>${s.full}: ${RATINGS[s.r].label} ${RATINGS[s.r].icon}</h4><div class="sub">${esc(s.head)}</div><ul>` +
+      s.pro.map((t) => `<li>✓ ${esc(t)}</li>`).join("") + s.con.map((t) => `<li>✕ ${esc(t)}</li>`).join("") + `</ul>`;
+
+    const rent = (BUD.result && BUD.result.budget) || (state.D && state.D.filters && state.D.filters.rent_max) || 0;
+    const base = "Nationally, rent from December to February runs about 3–5% below summer. Zumper found December about 4.5% under July, and Zillow found January about $60 a month cheaper than August.";
+    $("whenSave").innerHTML = rent
+      ? `${base} <span class="savings">At ${money(rent)}/mo, that's about ${money(rent * 0.03)}–${money(rent * 0.05)} a month, or ${money(rent * 0.36)}–${money(rent * 0.6)} over a 12-month lease.</span>`
+      : base;
+    renderWhenChart();
+  }
+  function renderWhenChart() {
+    const el = $("whenChart"), rows = (state.D && state.D.seasonal) || [];
+    if (rows.length < 3) {
+      el.innerHTML = `<p class="hint" style="margin:0">Not enough history yet: ${rows.length} month${rows.length === 1 ? "" : "s"} with 5 or more listings so far.
+        Each time you press <b>Find new listings</b>, the app records asking prices. After a few months, this chart shows whether rents <i>here</i> really dip in winter.</p>`;
+      return;
+    }
+    const W = 680, H = 214, L = 44, Rp = 8, T = 18, B = 40;
+    const vals = rows.map((r) => r.pct_vs_typical);
+    const top = Math.max(2, ...vals), bot = Math.min(-2, ...vals);
+    const y = (v) => T + (top - v) / (top - bot) * (H - T - B);
+    const bw = (W - L - Rp) / rows.length, barW = Math.max(6, Math.min(36, bw - 2));
+    const ticks = [bot, 0, top].map((v) => Math.round(v));
+    const ext = [vals.indexOf(Math.max(...vals)), vals.indexOf(Math.min(...vals))];
+    const bar = (x, v) => {  // rounded only at the data end, flat on the zero line
+      const y0 = y(0), y1 = y(v), r = Math.min(4, Math.abs(y1 - y0) / 2), w = barW;
+      if (v >= 0) return `M${x},${y0}V${y1 + r}Q${x},${y1} ${x + r},${y1}H${x + w - r}Q${x + w},${y1} ${x + w},${y1 + r}V${y0}Z`;
+      return `M${x},${y0}V${y1 - r}Q${x},${y1} ${x + r},${y1}H${x + w - r}Q${x + w},${y1} ${x + w},${y1 - r}V${y0}Z`;
+    };
+    const mLabel = (m) => { const [yy, mm] = m.split("-"); return `${MONTHS[+mm - 1].n} ’${yy.slice(2)}`; };
+    let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Asking rent compared with typical, by month listed">`;
+    ticks.forEach((t) => { svg += `<line x1="${L}" x2="${W - Rp}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)" stroke-width="${t === 0 ? 1.5 : 1}"/>
+      <text x="${L - 6}" y="${y(t) + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${t > 0 ? "+" : ""}${t}%</text>`; });
+    rows.forEach((r, i) => {
+      const x = L + i * bw + (bw - barW) / 2;
+      svg += `<path d="${bar(x, r.pct_vs_typical)}" fill="var(--pink-strong)"/>`;
+      if (rows.length <= 12 || i % 2 === 0) svg += `<text x="${x + barW / 2}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--muted)">${mLabel(r.month)}</text>`;
+      if (ext.includes(i)) svg += `<text x="${x + barW / 2}" y="${r.pct_vs_typical >= 0 ? y(r.pct_vs_typical) - 5 : y(r.pct_vs_typical) + 13}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text)">${r.pct_vs_typical > 0 ? "+" : ""}${r.pct_vs_typical}%</text>`;
+      svg += `<rect class="hit" data-i="${i}" x="${L + i * bw}" y="${T}" width="${bw}" height="${H - T - B}" fill="transparent"/>`;
+    });
+    svg += `</svg>`;
+    el.innerHTML = `<p class="hint" style="margin:0 0 6px">Typical asking rent for places listed each month, compared with the usual price for the same number of bedrooms. Below zero means cheaper.
+      Early on this leans toward places that sat unrented, so it gets more accurate the longer you use the app.</p>
+      <div class="chart-wrap">${svg}<div class="chart-tip" hidden></div></div>
+      <details style="margin-top:6px"><summary class="hint" style="cursor:pointer">Show as a table</summary>
+      <table style="font-size:13px;border-collapse:collapse;margin-top:6px">${rows.map((r) =>
+        `<tr><td style="padding:2px 12px 2px 0">${mLabel(r.month)}</td><td style="padding:2px 12px 2px 0;font-variant-numeric:tabular-nums">${r.pct_vs_typical > 0 ? "+" : ""}${r.pct_vs_typical}%</td><td class="sub">${r.count} listings</td></tr>`).join("")}</table></details>`;
+    const tip = el.querySelector(".chart-tip"), wrap = el.querySelector(".chart-wrap");
+    el.querySelectorAll(".hit").forEach((h) => {
+      h.addEventListener("mousemove", (e) => {
+        const r = rows[+h.dataset.i], box = wrap.getBoundingClientRect();
+        tip.innerHTML = `<b>${mLabel(r.month)}</b><br>${r.pct_vs_typical > 0 ? "+" : ""}${r.pct_vs_typical}% vs. typical · ${r.count} listings`;
+        tip.hidden = false;
+        tip.style.left = `${Math.min(e.clientX - box.left + 12, box.width - tip.offsetWidth)}px`;
+        tip.style.top = `${e.clientY - box.top - 40}px`;
+      });
+      h.addEventListener("mouseleave", () => (tip.hidden = true));
+    });
+  }
+  $("whenMonths").addEventListener("click", (e) => {
+    const b = e.target.closest(".month"); if (!b) return;
+    whenSel = +b.dataset.i; Sound.select(); renderWhen();
+    const nb = $("whenMonths").querySelector(`[data-i="${whenSel}"]`); bounce(nb); nb.focus();
+  });
+  $("whenBtn").addEventListener("click", () => { whenSel = new Date().getMonth(); renderWhen(); $("when").hidden = false; Sound.whoosh(); });
+  const closeWhen = () => ($("when").hidden = true);
+  $("whenClose").addEventListener("click", closeWhen);
+  $("when").addEventListener("click", (e) => { if (e.target === $("when")) closeWhen(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("when").hidden) closeWhen(); });
+
   // Sounds on/off
   const muteIcon = () => {
     $("muteBtn").textContent = Sound.muted ? "🔇" : "🔊";

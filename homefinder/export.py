@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from statistics import median
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 def _area_summary(listings: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -46,8 +46,11 @@ def build_meta(listings: List[Dict[str, Any]], cfg: Dict[str, Any],
 
 
 def write_dashboard_data(listings: List[Dict[str, Any]], cfg: Dict[str, Any],
-                         usage: Dict[str, Any]) -> Path:
+                         usage: Dict[str, Any],
+                         seasonal: Optional[List[Dict[str, Any]]] = None) -> Path:
     payload = dict(build_meta(listings, cfg, usage), listings=listings)
+    if seasonal is not None:
+        payload["seasonal"] = seasonal
     out = Path(cfg["dashboard_data"])
     out.parent.mkdir(parents=True, exist_ok=True)
     body = json.dumps(payload, indent=1, default=str)

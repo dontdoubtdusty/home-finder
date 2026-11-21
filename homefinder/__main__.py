@@ -23,6 +23,7 @@ from typing import Any, Dict, List, Optional
 from .config import ConfigError, load_config
 from .db import Database
 from .export import build_meta, write_dashboard_data
+from .seasonal import month_pattern
 from .scoring import score_listings
 from .sources import SourceError, build_sources
 
@@ -59,7 +60,8 @@ def usage_info(cfg: Dict[str, Any], db: Database) -> Dict[str, Any]:
 
 def report(cfg: Dict[str, Any], db: Database) -> List[Dict[str, Any]]:
     scored = score_listings(db.active_listings(), cfg)
-    path = write_dashboard_data(scored, cfg, usage_info(cfg, db))
+    path = write_dashboard_data(scored, cfg, usage_info(cfg, db),
+                                seasonal=month_pattern(db.listing_starts()))
     shown = sum(1 for l in scored if l["passes_filters"])
     log.info("Scored %d listings in area (%d match filters). Dashboard data: %s",
              len(scored), shown, path)

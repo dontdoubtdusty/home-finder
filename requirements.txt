@@ -1,0 +1,4 @@
+requests>=2.28
+PyYAML>=6.0
+# Only needed for the phone app sync (firebase.enabled: true)
+firebase-admin>=6.0

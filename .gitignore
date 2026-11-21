@@ -1,0 +1,27 @@
+# Personal settings (search location, API keys) - never commit
+config.yaml
+.env
+secrets/
+*service-account*.json
+
+# Generated data
+data/
+dashboard/data.js
+imports/*.csv
+
+# Desktop app build output
+build/
+*.exe
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

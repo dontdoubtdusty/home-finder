@@ -1,0 +1,68 @@
+# Copy this file to config.yaml and fill in your values.
+# config.yaml is git-ignored so your location and keys stay private.
+
+search:
+  # Center of the search (e.g. your workplace). Use decimal degrees.
+  # Tip: right-click a spot in Google Maps to copy its coordinates.
+  latitude: 0.0
+  longitude: 0.0
+  radius_miles: 5
+
+filters:
+  rent_min: 0
+  rent_max: 3000
+  beds_min: 1
+  baths_min: 1
+  # Pets you need allowed: any of [cat, dog]
+  pets: []
+  # Listings missing any of these are hidden. Known keys:
+  # in_unit_laundry, laundry_on_site, parking, garage, dishwasher, ac,
+  # gym, pool, elevator, balcony, furnished
+  amenities_required: []
+  # These only boost the score.
+  amenities_preferred: []
+  # Many sources (e.g. RentCast) don't report pets/amenities.
+  # false = keep listings where it's unknown (flagged "?"); true = hide them.
+  exclude_unknown: false
+
+sources:
+  rentcast:
+    enabled: true
+    # Put the key in config.yaml as api_key, or set this environment variable.
+    api_key: ""
+    api_key_env: RENTCAST_API_KEY
+    # Free tier is 50 requests/month; stay under it.
+    monthly_request_budget: 45
+    # RentCast returns up to 500 listings per request; each extra page costs a request.
+    page_size: 500
+    max_pages: 1
+  csv_import:
+    enabled: true
+    # Drop CSV files here (see templates/import_template.csv).
+    folder: imports
+  phone:
+    # Listings added in the phone app. Needs firebase.enabled below.
+    enabled: true
+
+# Phone app sync. See SETUP.md for creating the Firebase project.
+firebase:
+  enabled: false
+  # Downloaded from Firebase console > Project settings > Service accounts.
+  # secrets/ is git-ignored. Never commit this file or put it in the app.
+  service_account: secrets/firebase-service-account.json
+  # Delete listings from the app this many days after they disappear (favorites are kept).
+  prune_days: 30
+
+scoring:
+  # Comparable listings must be within this distance and have the same bed count.
+  comp_radius_miles: 1.0
+  min_comps: 3
+  # Flag listings at least this far below the local median.
+  below_market_pct: 10
+  # Flag listings on the market at least this many days.
+  stale_days: 30
+  # Ignore price changes smaller than this.
+  price_drop_min_pct: 2
+
+database: data/homefinder.db
+dashboard_data: dashboard/data.js

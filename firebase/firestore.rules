@@ -1,0 +1,61 @@
+rules_version = '2';
+
+// Paste this into Firebase console > Firestore Database > Rules, then Publish.
+// Only Google accounts listed in allowed_users (add them with
+// `py -m homefinder allow EMAIL`) can read or write anything.
+// The PC collector uses a service account, which bypasses these rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function allowed() {
+      return signedIn() && exists(
+        /databases/$(database)/documents/allowed_users/$(request.auth.token.email.lower()));
+    }
+
+    function optStr(v, max) { return v == null || (v is string && v.size() <= max); }
+    function optNum(v) { return v == null || v is number; }
+
+    // Written only by the PC collector.
+    match /listings/{id} {
+      allow read: if allowed();
+      allow write: if false;
+    }
+    match /meta/{id} {
+      allow read: if allowed();
+      allow write: if false;
+    }
+
+    // Shared favorite / hidden / note per listing.
+    match /state/{id} {
+      allow read: if allowed();
+      allow write: if allowed()
+        && request.resource.data.keys().hasOnly(
+             ['favorite', 'hidden', 'note', 'updated_by', 'updated_at'])
+        && optStr(request.resource.data.get('note', null), 2000);
+    }
+
+    // Listings added from the phone; picked up by the PC on its next run.
+    match /submissions/{id} {
+      allow read, delete: if allowed();
+      allow create, update: if allowed()
+        && request.resource.data.price is number
+        && request.resource.data.price > 0
+        && optStr(request.resource.data.get('url', null), 1000)
+        && optStr(request.resource.data.get('address', null), 200)
+        && optStr(request.resource.data.get('source', null), 40)
+        && optNum(request.resource.data.get('beds', null))
+        && optNum(request.resource.data.get('latitude', null))
+        && optNum(request.resource.data.get('longitude', null));
+    }
+
+    // Lets the app check whether you're on the list. Managed from the PC only.
+    match /allowed_users/{email} {
+      allow get: if signedIn() && request.auth.token.email.lower() == email;
+      allow write: if false;
+    }
+  }
+}

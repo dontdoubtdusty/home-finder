@@ -1,0 +1,2 @@
+source,url,address,unit,city,state,zip,price,beds,baths,sqft,latitude,longitude,pets,amenities,listed_date,observed_date
+zillow,https://www.zillow.com/homedetails/example,123 Main Street,4B,Springfield,IL,62701,1850,2,1,900,39.7990,-89.6440,cat;dog,in_unit_laundry;parking,2026-10-30,2026-11-21

@@ -130,6 +130,36 @@
   @keyframes hop { 0%, 100% { transform: rotate(45deg) translate(0, 0); } 50% { transform: rotate(45deg) translate(-5px, -5px); } }
   @media (prefers-reduced-motion: reduce) { .hearts span { animation: none; } .card { transition: none; } }
 
+  /* Settings screen */
+  .summary-chip { background: var(--soft); border-color: var(--pink); color: var(--pink-strong); font-weight: 600; }
+  .dialog.wide { width: min(780px, 100%); max-height: 90vh; display: flex; flex-direction: column; padding: 0; }
+  .dialog.wide .dlg-head { padding: 20px 24px 8px; display: flex; align-items: center; gap: 12px; }
+  .dialog.wide .dlg-scroll { overflow-y: auto; padding: 4px 24px 8px; }
+  .dialog.wide .actions { padding: 12px 24px 18px; margin: 0; border-top: 2px solid var(--soft); }
+  .set-section { padding: 14px 0; border-bottom: 2px dashed var(--soft); }
+  .set-section:last-child { border-bottom: 0; }
+  .set-section h3 { margin: 0 0 4px; font: 700 15px var(--font-display); display: flex; align-items: center; gap: 8px; }
+  .set-section .hint { color: var(--muted); font-size: 12.5px; margin: 0 0 10px; }
+  .pick { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pick button { border: 2px solid var(--line); background: var(--panel); color: var(--text); border-radius: 999px;
+                 padding: 8px 16px; cursor: pointer; font-weight: 600; min-width: 64px; }
+  .pick button:hover { border-color: var(--pink); }
+  .pick button[aria-pressed="true"] { background: var(--pink-strong); border-color: var(--pink-strong); color: var(--on-pink); }
+  .pick.big button { padding: 12px 20px; font-size: 15px; min-width: 80px; }
+  .row-inputs { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .row-inputs label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--muted); }
+  .money { display: flex; align-items: center; border: 2px solid var(--line); border-radius: 12px; background: var(--panel); padding: 0 10px; }
+  .money:focus-within { border-color: var(--pink); }
+  .money span { color: var(--muted); }
+  .money input { border: 0; outline: 0; background: transparent; color: var(--text); font: inherit; font-size: 16px; padding: 8px 4px; width: 110px; }
+  #setMap { height: 240px; border-radius: 16px; border: 2px solid var(--line); margin-top: 10px; }
+  .range-row { display: flex; align-items: center; gap: 12px; }
+  .range-row input[type=range] { flex: 1; accent-color: var(--pink-strong); }
+  .range-row output { font-weight: 700; color: var(--pink-strong); min-width: 70px; }
+  .toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .toggle input { accent-color: var(--pink-strong); width: 18px; height: 18px; }
+  .set-error { color: var(--bow-dark); font-weight: 600; margin-right: auto; align-self: center; }
+
   @media (max-width: 860px) {
     main { grid-template-columns: 1fr; }
     #mapWrap { min-height: 320px; height: 320px; }
@@ -149,6 +179,9 @@
   </div>
   <div class="head-right">
     <span class="pill" id="usage" hidden></span>
+    <button class="btn" id="settingsBtn" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      Search settings</button>
     <button class="btn" id="rescoreBtn" hidden title="Recalculate deals from saved listings (no API use)">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Re-rank</button>
@@ -162,7 +195,7 @@
 <div class="bar controls">
   <label><input type="checkbox" id="onlyMatch" checked> Only my must-haves</label>
   <label>Max rent <input type="number" id="maxRent" step="50" min="0" placeholder="Any"></label>
-  <label>Beds ≥ <input type="number" id="minBeds" step="1" min="0" placeholder="Any"></label>
+  <button class="chip summary-chip" id="prefSummary" hidden title="Change search settings"></button>
   <label>Sort <select id="sort">
     <option value="score">Best deal</option>
     <option value="price">Lowest price</option>
@@ -187,6 +220,68 @@
   </div>
 </div>
 
+<div class="overlay" id="settings" hidden>
+  <div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+    <div class="dlg-head">
+      <svg viewBox="0 0 64 40" width="40" height="25" aria-hidden="true"><path d="M32 20C22 6 6 2 4 12s6 22 28 8zM32 20C42 6 58 2 60 12s-6 22-28 8z" fill="#e60026"/><ellipse cx="32" cy="20" rx="7" ry="8" fill="#e60026" stroke="#fff" stroke-width="2.5"/></svg>
+      <div><h2 id="setTitle" style="margin:0">What are we looking for?</h2>
+        <div class="sub">Changes apply as soon as you save.</div></div>
+    </div>
+    <div class="dlg-scroll">
+      <section class="set-section">
+        <h3>🛏️ Bedrooms</h3>
+        <p class="hint">Tap every size that works. Leave all off for any size.</p>
+        <div class="pick big" id="setBeds"></div>
+      </section>
+      <section class="set-section">
+        <h3>💸 Monthly rent</h3>
+        <div class="row-inputs">
+          <label>From <span class="money"><span>$</span><input id="setRentMin" type="number" min="0" step="25" inputmode="numeric"></span></label>
+          <label>Up to <span class="money"><span>$</span><input id="setRentMax" type="number" min="0" step="25" inputmode="numeric" placeholder="No limit"></span></label>
+        </div>
+      </section>
+      <section class="set-section">
+        <h3>🛁 Bathrooms</h3>
+        <div class="pick" id="setBaths"></div>
+      </section>
+      <section class="set-section">
+        <h3>🐾 Pets that need to be allowed</h3>
+        <div class="pick" id="setPets"></div>
+      </section>
+      <section class="set-section">
+        <h3>✅ Must-haves</h3>
+        <p class="hint">Homes known not to have these are hidden.</p>
+        <div class="pick" id="setRequired"></div>
+      </section>
+      <section class="set-section">
+        <h3>✨ Nice-to-haves</h3>
+        <p class="hint">These just move homes up the list.</p>
+        <div class="pick" id="setPreferred"></div>
+      </section>
+      <section class="set-section">
+        <h3>❓ Homes that don't say</h3>
+        <p class="hint">RentCast listings never say whether pets, parking or A/C are allowed.</p>
+        <label class="toggle"><input type="checkbox" id="setExclude"> Hide homes that don't say (fewer results)</label>
+      </section>
+      <section class="set-section">
+        <h3>🎀 How picky are the deal tags?</h3>
+        <div class="pick" id="setPreset"></div>
+      </section>
+      <section class="set-section">
+        <h3>📍 Where</h3>
+        <p class="hint">Click the map to move the center. Drag the slider to change how far to look.</p>
+        <div class="range-row"><input type="range" id="setRadius" min="1" max="25" step="1" aria-label="Search radius in miles"><output id="setRadiusOut"></output></div>
+        <div id="setMap"></div>
+      </section>
+    </div>
+    <div class="actions">
+      <span class="set-error" id="setError" role="alert"></span>
+      <button class="btn" id="setCancel">Cancel</button>
+      <button class="btn primary" id="setSave">Save ♥</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 (function () {
@@ -201,8 +296,10 @@
   const PINK = "#d6336c", BOW = "#e60026", GREY = "#c9a3b3";
 
   // --- desktop API (only when opened by the exe)
-  const api = (path, method = "GET") => fetch(path, { method, headers: { "X-Token": TOKEN } })
-    .then((r) => r.json().then((j) => ({ status: r.status, body: j })));
+  const api = (path, method = "GET", body) => fetch(path, {
+    method, headers: Object.assign({ "X-Token": TOKEN }, body ? { "Content-Type": "application/json" } : {}),
+    body: body ? JSON.stringify(body) : undefined,
+  }).then((r) => r.json().then((j) => ({ status: r.status, body: j })));
 
   // --- data (data.js via <script> so it also works when opened from disk)
   function loadData() {
@@ -230,10 +327,9 @@
 
   function visible() {
     const D = state.D; if (!D) return [];
-    const only = $("onlyMatch").checked, max = parseFloat($("maxRent").value), beds = parseFloat($("minBeds").value);
+    const only = $("onlyMatch").checked, max = parseFloat($("maxRent").value);
     const rows = D.listings.filter((l) =>
       (!only || l.passes_filters) && (isNaN(max) || l.price <= max) &&
-      (isNaN(beds) || l.beds == null || l.beds >= beds) &&
       [...state.flags].every((f) => l.flags.includes(f)));
     const by = {
       score: (a, b) => b.score - a.score, price: (a, b) => a.price - b.price,
@@ -348,7 +444,7 @@
     state.flags.has(f) ? state.flags.delete(f) : state.flags.add(f);
     b.setAttribute("aria-pressed", state.flags.has(f)); render();
   });
-  ["onlyMatch", "maxRent", "minBeds", "sort"].forEach((id) => $(id).addEventListener("input", render));
+  ["onlyMatch", "maxRent", "sort"].forEach((id) => $(id).addEventListener("input", render));
   $("list").addEventListener("click", (e) => {
     if (e.target.closest("a")) return;
     const c = e.target.closest(".card"); if (c) select(c.dataset.id, true);
@@ -384,7 +480,7 @@
     } catch { return null; }
   }
 
-  async function runJob(kind) {
+  async function runJob(kind, quiet = false) {
     const r = await api("api/" + kind, "POST");
     if (r.status === 409) { /* already running: just watch it */ }
     $("dlgActions").dataset.busy = "1";
@@ -400,7 +496,9 @@
         $("dlgActions").dataset.busy = "0";
         state.D = await loadData();
         render();
-        if (s.job.ok) {
+        if (s.job.ok && quiet) {
+          closeDialog();
+        } else if (s.job.ok) {
           const n = state.D ? state.D.listings.filter((l) => l.passes_filters).length : 0;
           dialog("All done! ♥", `<p>${n} homes match what you're looking for.</p><div class="log">${esc(s.job.log.join("\n"))}</div>`,
             [["Yay!", "primary", closeDialog]]);
@@ -429,9 +527,145 @@
   });
   $("rescoreBtn").addEventListener("click", () => runJob("rescore"));
 
+  // --- Search settings screen
+  const AMENITY_LABELS = {
+    in_unit_laundry: "In-unit laundry", laundry_on_site: "Laundry on site", parking: "Parking",
+    garage: "Garage", dishwasher: "Dishwasher", ac: "A/C", gym: "Gym", pool: "Pool",
+    elevator: "Elevator", balcony: "Balcony", furnished: "Furnished",
+  };
+  const BED_LABELS = { 0: "Studio", 1: "1 bed", 2: "2 beds", 3: "3 beds", 4: "4+ beds" };
+  const BATHS = [[0, "Any"], [1, "1+"], [1.5, "1.5+"], [2, "2+"], [3, "3+"]];
+  const PRESET_LABELS = { more: "Show me more", balanced: "Balanced", great: "Only great deals" };
+  const PET_LABELS = { cat: "🐱 Cats", dog: "🐶 Dogs" };
+  const S = { cur: null, map: null, circle: null, marker: null };
+
+  // Toggle-button groups: multi = any number on; single = exactly one on.
+  function pickGroup(el, items, selected, multi) {
+    el.innerHTML = items.map(([v, label]) =>
+      `<button type="button" data-v="${esc(v)}" aria-pressed="${selected.some((s) => String(s) === String(v))}">${esc(label)}</button>`).join("");
+    el.onclick = (e) => {
+      const b = e.target.closest("button"); if (!b) return;
+      if (!multi) el.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", "false"));
+      b.setAttribute("aria-pressed", multi ? String(b.getAttribute("aria-pressed") !== "true") : "true");
+      if (el.onpick) el.onpick(b);
+    };
+  }
+  const picked = (el) => [...el.querySelectorAll('button[aria-pressed="true"]')].map((b) => b.dataset.v);
+
+  function summaryText(c) {
+    const beds = c.beds.length ? c.beds.map((b) => b === 0 ? "Studio" : b === 4 ? "4+ bd" : `${b} bd`).join(", ")
+      : (c.beds_min ? `${c.beds_min}+ bd` : "Any size");
+    const rent = c.rent_max ? (c.rent_min ? `${money(c.rent_min)}–${money(c.rent_max)}` : `up to ${money(c.rent_max)}`) : "any price";
+    const pets = c.pets.length ? " · " + c.pets.map((p) => p === "cat" ? "cats" : "dogs").join(" & ") + " OK" : "";
+    return `🎀 ${beds} · ${rent}${pets} · ${c.radius_miles} mi`;
+  }
+
+  async function loadSettings() {
+    const r = await api("api/settings");
+    if (r.status !== 200) throw new Error(r.body.error || "Couldn't load settings");
+    S.cur = r.body;
+    $("prefSummary").textContent = summaryText(S.cur);
+    $("prefSummary").hidden = false;
+    return S.cur;
+  }
+
+  function drawSetMap(lat, lon, miles) {
+    if (!window.L) return;
+    if (!S.map) {
+      S.map = L.map("setMap", { scrollWheelZoom: false }).setView([lat, lon], 11);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap" }).addTo(S.map);
+      S.circle = L.circle([lat, lon], { radius: 1, color: PINK, weight: 2, dashArray: "6 6", fillColor: "#ff8db5", fillOpacity: 0.1 }).addTo(S.map);
+      S.marker = L.marker([lat, lon], { icon: L.divIcon({ className: "", html: '<div style="font-size:24px;line-height:1">🎀</div>', iconSize: [24, 24], iconAnchor: [12, 12] }) }).addTo(S.map);
+      S.map.on("click", (e) => {
+        S.lat = +e.latlng.lat.toFixed(5); S.lon = +e.latlng.lng.toFixed(5);
+        S.marker.setLatLng(e.latlng); S.circle.setLatLng(e.latlng);
+      });
+    }
+    S.marker.setLatLng([lat, lon]); S.circle.setLatLng([lat, lon]); S.circle.setRadius(miles * 1609.34);
+    setTimeout(() => { S.map.invalidateSize(); S.map.fitBounds(S.circle.getBounds(), { padding: [10, 10] }); }, 50);
+  }
+
+  async function openSettings() {
+    let c;
+    try { c = await loadSettings(); } catch (e) {
+      dialog("Setup needed", `<p>${esc(e.message)}</p>`, [["OK", "primary", closeDialog]]); return;
+    }
+    $("setError").textContent = "";
+    pickGroup($("setBeds"), c.options.beds.map((b) => [b, BED_LABELS[b]]), c.beds, true);
+    $("setRentMin").value = c.rent_min || "";
+    $("setRentMax").value = c.rent_max ?? "";
+    const bathSel = BATHS.some(([v]) => v === c.baths_min) ? c.baths_min : 0;
+    pickGroup($("setBaths"), BATHS, [bathSel], false);
+    pickGroup($("setPets"), c.options.pets.map((p) => [p, PET_LABELS[p] || p]), c.pets, true);
+    const amen = c.options.amenities.map((a) => [a, AMENITY_LABELS[a] || a]);
+    pickGroup($("setRequired"), amen, c.amenities_required, true);
+    pickGroup($("setPreferred"), amen, c.amenities_preferred, true);
+    // An amenity can be a must-have or a nice-to-have, not both.
+    const exclusive = (other) => (b) => {
+      if (b.getAttribute("aria-pressed") === "true") {
+        const twin = other.querySelector(`button[data-v="${CSS.escape(b.dataset.v)}"]`);
+        if (twin) twin.setAttribute("aria-pressed", "false");
+      }
+    };
+    $("setRequired").onpick = exclusive($("setPreferred"));
+    $("setPreferred").onpick = exclusive($("setRequired"));
+    $("setExclude").checked = c.exclude_unknown;
+    pickGroup($("setPreset"), c.options.presets.map((p) => [p, PRESET_LABELS[p] || p]),
+      [c.deal_preset === "custom" ? "balanced" : c.deal_preset], false);
+    S.lat = c.latitude; S.lon = c.longitude;
+    $("setRadius").value = Math.min(25, Math.max(1, Math.round(c.radius_miles)));
+    $("setRadiusOut").textContent = `${$("setRadius").value} miles`;
+    $("settings").hidden = false;
+    drawSetMap(S.lat, S.lon, +$("setRadius").value);
+    $("setBeds").querySelector("button").focus();
+  }
+  $("setRadius").addEventListener("input", () => {
+    $("setRadiusOut").textContent = `${$("setRadius").value} miles`;
+    if (S.circle) S.circle.setRadius($("setRadius").value * 1609.34);
+  });
+
+  const closeSettings = () => ($("settings").hidden = true);
+  $("setCancel").addEventListener("click", closeSettings);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("settings").hidden) closeSettings(); });
+  $("settingsBtn").addEventListener("click", openSettings);
+  $("prefSummary").addEventListener("click", openSettings);
+
+  $("setSave").addEventListener("click", async () => {
+    const rentMax = $("setRentMax").value.trim();
+    const payload = {
+      latitude: S.lat, longitude: S.lon, radius_miles: +$("setRadius").value,
+      rent_min: +$("setRentMin").value || 0, rent_max: rentMax === "" ? null : +rentMax,
+      beds: picked($("setBeds")).map(Number),
+      baths_min: +(picked($("setBaths"))[0] || 0),
+      pets: picked($("setPets")),
+      amenities_required: picked($("setRequired")),
+      amenities_preferred: picked($("setPreferred")),
+      exclude_unknown: $("setExclude").checked,
+      deal_preset: picked($("setPreset"))[0] || "balanced",
+    };
+    $("setSave").disabled = true; $("setError").textContent = "";
+    try {
+      const r = await api("api/settings", "POST", payload);
+      if (r.status === 409) { $("setError").textContent = "Busy with a search. Try again in a moment."; return; }
+      if (r.status !== 200) { $("setError").textContent = r.body.error || "Couldn't save"; return; }
+      closeSettings();
+      await loadSettings();
+      await runJob("rescore", true);
+      if (r.body.area_changed) {
+        dialog("New area saved ♥", "<p>You changed where to look. Click <b>Find new listings</b> to search the new area.</p>",
+          [["Later", "", closeDialog], ["Find homes now", "primary", () => runJob("refresh")]]);
+      }
+    } catch (e) {
+      $("setError").textContent = "Couldn't save: " + e.message;
+    } finally {
+      $("setSave").disabled = false;
+    }
+  });
+
   // --- start
   if (DESKTOP) {
-    $("refreshBtn").hidden = false; $("rescoreBtn").hidden = false;
+    $("refreshBtn").hidden = false; $("rescoreBtn").hidden = false; $("settingsBtn").hidden = false;
+    loadSettings().catch(() => {});
     refreshStatus().then((s) => { if (s && s.job.running) runJob(s.job.kind); });
     // Heartbeat: lets the app quit cleanly after the window is closed.
     setInterval(() => fetch("api/ping", { method: "POST", headers: { "X-Token": TOKEN } }).catch(() => {}), 10000);

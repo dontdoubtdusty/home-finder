@@ -69,7 +69,11 @@ The dashboard is `dashboard/index.html`. Open it directly from disk; no server n
 ### Desktop app: Bebe's Home Search
 
 `Bebe's Home Search.exe` opens the dashboard in its own window, with a
-**Find new listings** button (one RentCast request) and **Re-rank** (no API use).
+**Find new listings** button (one RentCast request), **Re-rank** (no API use), and
+**Search settings**: a screen for bedrooms (pick any of Studio/1/2/3/4+), rent,
+bathrooms, pets, must-have and nice-to-have amenities, deal-tag strictness, and the
+search area (click the map, drag the radius). Those choices are saved to
+`data/settings.json` and override `config.yaml`, which is never rewritten.
 It must sit in this folder, next to `config.yaml`. Build or rebuild it with:
 
 ```powershell

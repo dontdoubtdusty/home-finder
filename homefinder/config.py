@@ -11,6 +11,7 @@ DEFAULTS: Dict[str, Any] = {
     "filters": {
         "rent_min": 0,
         "rent_max": None,
+        "beds": [],          # exact bedroom counts allowed (0 = studio, 4 = 4+); [] = any
         "beds_min": 0,
         "baths_min": 0,
         "pets": [],
@@ -44,7 +45,11 @@ DEFAULTS: Dict[str, Any] = {
     },
     "database": "data/homefinder.db",
     "dashboard_data": "dashboard/data.js",
+    # Written by the app's Settings screen; overrides search/filters/scoring above.
+    "settings_file": "data/settings.json",
 }
+
+OVERRIDABLE = ("search", "filters", "scoring")
 
 
 class ConfigError(Exception):
@@ -69,6 +74,15 @@ def load_config(path: Path) -> Dict[str, Any]:
     with path.open("r", encoding="utf-8") as fh:
         user_cfg = yaml.safe_load(fh) or {}
     cfg = _merge(DEFAULTS, user_cfg)
+
+    # Layer on choices saved from the Settings screen.
+    from .settings import load_overrides
+    settings_path = (path.resolve().parent / cfg["settings_file"]).resolve()
+    cfg["settings_file"] = str(settings_path)
+    overrides = load_overrides(settings_path)
+    for section in OVERRIDABLE:
+        if isinstance(overrides.get(section), dict):
+            cfg[section] = _merge(cfg[section], overrides[section])
 
     search = cfg["search"]
     lat, lon = search.get("latitude"), search.get("longitude")

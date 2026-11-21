@@ -42,11 +42,16 @@ def check_filters(l: Dict[str, Any], f: Dict[str, Any]) -> Tuple[bool, List[str]
         return False, []
     if f.get("beds_min") and l.get("beds") is not None and l["beds"] < f["beds_min"]:
         return False, []
+    allowed_beds = f.get("beds") or []
+    if allowed_beds and l.get("beds") is not None:
+        b = l["beds"]
+        if not (int(b) in allowed_beds or (4 in allowed_beds and b >= 4)):
+            return False, []
     if f.get("baths_min") and l.get("baths") is not None and l["baths"] < f["baths_min"]:
         return False, []
 
     unknowns: List[str] = []
-    if f.get("beds_min") and l.get("beds") is None:
+    if (f.get("beds_min") or allowed_beds) and l.get("beds") is None:
         unknowns.append("beds")
     if f.get("baths_min") and l.get("baths") is None:
         unknowns.append("baths")

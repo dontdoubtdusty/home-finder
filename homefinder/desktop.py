@@ -176,6 +176,28 @@ class DesktopApp:
             out["config_error"] = str(exc)
         return out
 
+    def get_settings(self) -> Dict[str, Any]:
+        from .config import load_config
+        from .settings import current
+        return current(load_config(self.config_path))
+
+    def save_settings(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate + save, then re-rank. Raises SettingsError on bad input."""
+        from .config import load_config
+        from .settings import save_overrides, validate
+        if self.job["running"]:
+            return {"saved": False, "busy": True}
+        cfg = load_config(self.config_path)
+        before = cfg["search"]
+        overrides = validate(payload)
+        after = overrides["search"]
+        save_overrides(Path(cfg["settings_file"]), overrides)
+        area_changed = (after["radius_miles"] > before["radius_miles"]
+                        or abs(after["latitude"] - before["latitude"]) > 1e-4
+                        or abs(after["longitude"] - before["longitude"]) > 1e-4)
+        started = self.start_job("rescore")
+        return {"saved": True, "area_changed": area_changed, "rescore_started": started}
+
     def data_file(self) -> Path:
         try:
             from .config import load_config
@@ -230,6 +252,11 @@ def make_handler(app: DesktopApp):
                 return self._send(200, body, "text/javascript; charset=utf-8")
             if path == "/api/status":
                 return self._json(app.status())
+            if path == "/api/settings":
+                try:
+                    return self._json(app.get_settings())
+                except Exception as exc:
+                    return self._json({"error": str(exc)}, 500)
             return self._send(404, b"Not found", "text/plain")
 
         def do_POST(self):
@@ -242,6 +269,17 @@ def make_handler(app: DesktopApp):
             if path in ("/api/refresh", "/api/rescore"):
                 started = app.start_job(path.rsplit("/", 1)[1])
                 return self._json({"started": started}, 202 if started else 409)
+            if path == "/api/settings":
+                from .settings import SettingsError
+                length = int(self.headers.get("Content-Length") or 0)
+                if length <= 0 or length > 20000:
+                    return self._json({"error": "Bad request"}, 400)
+                try:
+                    payload = json.loads(self.rfile.read(length).decode("utf-8"))
+                    result = app.save_settings(payload)
+                except (SettingsError, ValueError) as exc:
+                    return self._json({"error": str(exc)}, 400)
+                return self._json(result, 200 if result.get("saved") else 409)
             return self._send(404, b"Not found", "text/plain")
 
     return Handler

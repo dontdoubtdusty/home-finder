@@ -74,5 +74,39 @@ class DesktopServerTest(unittest.TestCase):
         self.assertIn(b"1 A St", body)
 
 
+class DesktopSettingsTest(DesktopServerTest):
+    def post_json(self, path, obj, token):
+        body = json.dumps(obj).encode()
+        r = urllib.request.Request(self.base + path, data=body, method="POST",
+                                   headers={"X-Token": token, "Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(r, timeout=5) as resp:
+                return resp.status, json.loads(resp.read())
+        except urllib.error.HTTPError as e:
+            return e.code, json.loads(e.read())
+
+    def test_settings_roundtrip(self):
+        t = self.app.token
+        code, body = self.req("/api/settings", token=t)
+        self.assertEqual(code, 200)
+        s = json.loads(body)
+        s.update(beds=[0, 1], rent_max=650, radius_miles=12)
+        s.pop("options")
+        code, res = self.post_json("/api/settings", s, t)
+        self.assertEqual(code, 200, res)
+        self.assertTrue(res["saved"])
+        self.assertTrue(res["area_changed"])  # radius grew 3 -> 12
+        for _ in range(50):
+            if not self.app.job["running"]:
+                break
+            time.sleep(0.1)
+        again = json.loads(self.req("/api/settings", token=t)[1])
+        self.assertEqual((again["beds"], again["rent_max"], again["radius_miles"]), ([0, 1], 650, 12))
+
+    def test_settings_rejects_bad_input_and_no_token(self):
+        self.assertEqual(self.post_json("/api/settings", {"beds": [9]}, self.app.token)[0], 400)
+        self.assertEqual(self.req("/api/settings", "POST")[0], 403)
+
+
 if __name__ == "__main__":
     unittest.main()
